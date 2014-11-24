@@ -1,5 +1,5 @@
 <?php
-include_once ('../../scholarbowl_config.php');
+include_once ('../../../scholarbowl_config.php');
 function connect_db_read(){
 	$link = mysqli_connect(HOST,USER,PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
 	if(mysqli_connect_errno()) {
