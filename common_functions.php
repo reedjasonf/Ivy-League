@@ -31,6 +31,12 @@ function sec_session_start() {
     session_start();            // Start the PHP session 
     session_regenerate_id(TRUE);    // regenerated the session, delete the old one. 
 }
+
+function print_navbar_items() {
+	echo '<p class="navcurrent">Home</p>
+				<p class="navlink">About</p>';
+}
+
 function print_letter_grade($percentage) {
 	if($percentage >= .975 && $percentage <= 1)
 		return "A+";

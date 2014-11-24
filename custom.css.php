@@ -11,23 +11,23 @@ html {
 	font-family: Calibri;
 }
 
-body/*#indexlogin*/ {
-	background-color: #5E6C5D;
-}
-
-body#dashboard {
+body {
 	background-color: #7FAE7D;
 	padding: 0;
 	margin: 0;
 }
 
-body#indexlogin div#page_content{
-	margin-top: 15%;
+body#indexlogin {
+	background-color: #5E6C5D;
 }
 
-body#dashboard div#page_content{
+div#page_content{
 	margin-top: 0;
 	padding: 0;
+}
+
+body#indexlogin div#page_content{
+	margin-top: 15%;
 }
 
 div#banner{
@@ -79,14 +79,14 @@ div#banner h1{
     -webkit-box-shadow: 1px 1px 2px #fff inset;
 }
 
+div#container{
+	margin: 0 2em;
+}
+
 body#indexlogin div#container{
 	width: 30em;
 	text-align: left;
 	margin: 0 auto;
-}
-
-body#dashboard div#container{
-	margin: 0 2em;
 }
 
 div#container div.wrapper h1{
