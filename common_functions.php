@@ -89,6 +89,174 @@ function date_with_micro($format, $timestamp = null) {
 	$microseconds = (int) round(($timestamp - floor($timestamp)) * 1000000.0, 0);
 	$format_with_micro = str_replace("u", $microseconds, $format);
 	return date($format_with_micro, $timestamp_int);
-} 
+}
+
+function get_user_classes($user_id) {
+	$myArray = [];
+	$link = connect_db_read();
+	if($class_stmt = mysqli_prepare($link, "SELECT id FROM `classes` WHERE student = ?"))
+	{
+		mysqli_stmt_bind_param($class_stmt, "i", $user_id);
+		mysqli_stmt_execute($class_stmt);
+		mysqli_stmt_bind_result($class_stmt, $class_id);
+		while(mysqli_stmt_fetch($class_stmt))
+		{
+			$myArray[] = $class_id;
+		}
+	}else
+		$myArray = False;
+	mysqli_close($link);
+	return $myArray;
+}
+
+function get_class_name($class_id) {
+	$link = connect_db_read();
+	if($class_stmt = mysqli_prepare($link, "SELECT name FROM `classes` WHERE id = ?"))
+	{
+		mysqli_stmt_bind_param($class_stmt, "i", $class_id);
+		mysqli_stmt_execute($class_stmt);
+		mysqli_stmt_bind_result($class_stmt, $class_name);
+		mysqli_stmt_fetch($class_stmt);
+		$var = $class_name;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function get_class_max_points($class_id) {
+	$link = connect_db_read();
+	if($class_stmt = mysqli_prepare($link, "SELECT total_pts FROM `classes` WHERE id = ?"))
+	{
+		mysqli_stmt_bind_param($class_stmt, "i", $class_id);
+		mysqli_stmt_execute($class_stmt);
+		mysqli_stmt_bind_result($class_stmt, $class_max_points);
+		mysqli_stmt_fetch($class_stmt);
+		$var = $class_max_points;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function get_class_categories($class_id) {
+	$myArray = [];
+	$link = connect_db_read();
+		if($cat_stmt = mysqli_prepare($link, "SELECT id FROM `grade_categories` WHERE class = ?"))
+		{
+			mysqli_stmt_bind_param($cat_stmt, "i", $class_id);
+			mysqli_stmt_execute($cat_stmt);
+			mysqli_stmt_bind_result($cat_stmt, $cat_id);
+			while(mysqli_stmt_fetch($cat_stmt))
+			{
+				$myArray[] = $cat_id;
+			}
+		}else
+			$myArray = False;
+	mysqli_close($link);
+	return $myArray;
+}
+
+function num_in_category($cat_id) {
+	$link = connect_db_read();
+	if($cat_stmt = mysqli_query($link, ("SELECT 1 FROM `grades` WHERE category = ".htmlspecialchars($cat_id))))
+	{
+		//mysqli_stmt_bind_param($cat_stmt, "i", $cat_id);
+		//mysqli_query($cat_stmt);
+		return mysqli_affected_rows($link);
+	}else
+		return False;
+	mysqli_close($link);
+}
+
+function category_name($cat_id) {
+	$link = connect_db_read();
+	if($cat_stmt = mysqli_prepare($link, "SELECT name FROM `grade_categories` WHERE id = ?"))
+	{
+		mysqli_stmt_bind_param($cat_stmt, "i", $cat_id);
+		mysqli_stmt_execute($cat_stmt);
+		mysqli_stmt_bind_result($cat_stmt, $cat_name);
+		mysqli_stmt_fetch($cat_stmt);
+		$var = $cat_name;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function category_max_points($cat_id) {
+	$link = connect_db_read();
+	if($cat_stmt = mysqli_prepare($link, "SELECT max_points FROM `grade_categories` WHERE id = ?"))
+	{
+		mysqli_stmt_bind_param($cat_stmt, "i", $cat_id);
+		mysqli_stmt_execute($cat_stmt);
+		mysqli_stmt_bind_result($cat_stmt, $cat_maxpts);
+		mysqli_stmt_fetch($cat_stmt);
+		$var = $cat_maxpts;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function category_percent($cat_id) {
+	$link = connect_db_read();
+	$total_earned = $max = $max_available = 0;
+	if($cat_stmt = mysqli_prepare($link, "SELECT grades.points_earned, grades.max_points, grade_categories.max_points FROM `grade_categories` INNER JOIN `grades` ON grades.category = grade_categories.id WHERE grades.category = ? "))
+	{
+		mysqli_stmt_bind_param($cat_stmt, "i", $cat_id);
+		mysqli_stmt_execute($cat_stmt);
+		mysqli_stmt_bind_result($cat_stmt, $pts_earned, $assignment_max, $cat_max_pts);
+		$i = 1;
+		while(mysqli_stmt_fetch($cat_stmt))
+		{
+			$total_earned += $pts_earned;
+			$max_available += $assignment_max;
+			if($i == 1){
+				$max = $cat_max_pts;
+				$i++;
+			}
+		}
+		if($max_available != 0)
+			$var = $total_earned/$max_available;
+		else
+			$var = 0;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function GPAfactor($percent) {
+	if($percent >= 0.9 && $percent <= 1)
+		$var = 4.0;
+	elseif($percent >= 0.8 && $percent < 0.9)
+		$var = 3.0;
+	elseif($percent >= 0.7 && $percent < 0.8)
+		$var = 2.0;
+	elseif($percent >= 0.6 && $percent < 0.7)
+		$var = 1.0;
+	else
+		$var = 0.0;
+	return $var;
+}
+
+function fetch_assignment_percents($cat_id) {
+	$myArray = [];
+	$link = connect_db_read();
+	if($grades_stmt = mysqli_prepare($link, "SELECT points_earned, max_points FROM `grades` WHERE category = ?"))
+	{
+		mysqli_stmt_bind_param($grades_stmt, "i", $cat_id);
+		mysqli_stmt_execute($grades_stmt);
+		mysqli_stmt_bind_result($grades_stmt, $pts_earned, $pts_available);
+		while(mysqli_stmt_fetch($grades_stmt))
+		{
+			$myArray[] = $pts_earned/$pts_available;
+		}
+	}else
+		$myArray = False;
+	mysqli_close($link);
+	return $myArray;
+}
 
 ?>

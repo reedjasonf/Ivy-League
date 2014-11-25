@@ -125,6 +125,32 @@ body#dashboard div#point_summary{
 	vertical-align: top;
 }
 
+body#dashboard div#point_summary div.pt_line_wrapper {
+	font-size: 130%;
+}
+
+body#dashboard div#point_summary div.pt_class_line {
+	display: inline-block;
+}
+
+body#dashboard div#point_summary div.class_rewards {
+	display: inline-block;
+	float: right;
+}
+
+body#dashboard div#point_summary div.pt_cat_line {
+	margin-left: 0.75cm;
+}
+
+body#dashboard div#point_summary div.pt_cat_line div.pt_cat_name {
+	display: inline-block;
+}
+
+body#dashboard div#point_summary div.pt_cat_line div.pt_cat {
+	display: inline-block;
+	float: right;
+}
+
 div#class_summary div.singleclass{
 	font-size: 130%;
 }

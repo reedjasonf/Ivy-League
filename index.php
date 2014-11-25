@@ -130,7 +130,7 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 				<div id="class_summary">
 					<h2>Class Summary</h2>
 					<hr>
-					<?php
+<?php
 					while(mysqli_stmt_fetch($class_stmt))
 					{
 						// for each class in the database print it's name (already obtained) and the current points over total
@@ -169,18 +169,74 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 										$category_points = 0;
 									//echo $category_points." ";
 									$total_points_earned += $category_points;
-								}
+								}else
+									echo 'There was a database error. Try again later.';
 							}
 						}else
-							echo 'something wrong';
+							echo 'There was a database error. Try again later.';
 					
 						echo '					<div class="singleclass"><div class="class_name">'.$class_name.'</div><div class="wrapper"><div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div><div class="class_letter_grade">'.print_letter_grade($total_points_earned/$class_max_points)."</div></div></div>\n";
 					}
-					?>
+					mysqli_close($link);
+					mysqli_close($link2);
+					mysqli_close($link3);
+?>
 				</div>
 				<div id="point_summary">
 					<h2>Point Summary</h2>
 					<hr>
+<?php
+						$classes = get_user_classes($_SESSION['uid']);
+						$reward_points = [];
+						foreach($classes as $class_id)
+						{
+							// for each class we need to know the categories,
+							// and the total number of points
+							$categories = get_class_categories($class_id);
+							$class_max_points = get_class_max_points($class_id);
+							foreach($categories as $cat_id)
+							{
+								// in each category we need to know: how many entries exist in that category,
+								// the total worth of that category, and how many points the student has earned so far
+								
+								// also query each assignment for it's grade (A, B, C, or D)
+								$category_entries = num_in_category($cat_id);
+								$category_weight = category_max_points($cat_id);
+								
+								$assignment_grades = fetch_assignment_percents($cat_id);
+								$GPA_sum = 0;
+								foreach($assignment_grades as $grade)
+								{
+									$GPA_sum += GPAfactor($grade);
+								}
+								
+								if($category_entries > 0 && $class_max_points > 0)
+								{
+									$category_reward_points = ($category_weight*$GPA_sum*10)/($class_max_points*$category_entries);
+								}else
+									$category_reward_points = 0;
+								
+								// package all of the information into an array so it can be displayed sensibly by class and then indented category breakdown
+								$reward_points[get_class_name($class_id)][category_name($cat_id)] = $category_reward_points;
+							}
+						}
+						$total_rewards = 0;
+						foreach($reward_points as $classname => $class)
+						{
+							$class_rewards = 0;
+							foreach($class as $category)
+							{
+								$class_rewards += $category;
+							}
+							$total_rewards += $class_rewards;
+							echo '					<div class="pt_line_wrapper"><div class="pt_class_line">'.$classname.'</div><div class="class_rewards">'.number_format($class_rewards, 2)."</div></div>\n";
+							foreach($class as $categoryName => $category)
+							{
+								echo '					<div class="pt_cat_line"><div class="pt_cat_name">'.$categoryName.'</div><div class="pt_cat">'.number_format($category, 2)."</div></div>\n";
+							}
+						}
+						//print_r($reward_points);
+?>
 				</div>
 			</div>
 		</div>
