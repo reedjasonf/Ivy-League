@@ -110,6 +110,19 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 		<meta charset="urf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Your Ivy-League Dashboard</title>
+		<script language="javascript" type="text/javascript">
+			function showhide_cats(class_id) {
+				var1 = document.getElementById('class_'+class_id);
+				if (var1.style.display == 'none' || var1.style.display == '')
+				{
+					var1.style.display = 'block';
+					document.getElementById('showhide_btn_'+class_id).innerHTML = '-';
+				} else {
+					var1.style.display = 'none';
+					document.getElementById('showhide_btn_'+class_id).innerHTML = '+';
+				}
+			}
+		</script>
 	</head>
 	<body id="dashboard">
 		<div id="page_content">
@@ -221,6 +234,7 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 							}
 						}
 						$total_rewards = 0;
+						$k = 0;
 						foreach($reward_points as $classname => $class)
 						{
 							$class_rewards = 0;
@@ -229,11 +243,13 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 								$class_rewards += $category;
 							}
 							$total_rewards += $class_rewards;
-							echo '					<div class="pt_line_wrapper"><div class="pt_class_line">'.$classname.'</div><div class="class_rewards">'.number_format($class_rewards, 2)."</div></div>\n";
+							echo '					<div class="pt_line_wrapper"><button onclick="showhide_cats('.++$k.');return false;" id="showhide_btn_'.$k.'">+</button><div class="pt_class_line">'.$classname.'</div><div class="class_rewards">'.number_format($class_rewards, 2)."</div></div>\n";
+							echo '					<div class="hide_cats" id="class_'.$k.'">';
 							foreach($class as $categoryName => $category)
 							{
-								echo '					<div class="pt_cat_line"><div class="pt_cat_name">'.$categoryName.'</div><div class="pt_cat">'.number_format($category, 2)."</div></div>\n";
+								echo '						<div class="pt_cat_line"><div class="pt_cat_name">'.$categoryName.'</div><div class="pt_cat">'.number_format($category, 2)."</div></div>\n";
 							}
+							echo '					</div>';
 						}
 						//print_r($reward_points);
 ?>

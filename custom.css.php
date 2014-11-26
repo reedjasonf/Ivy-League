@@ -50,6 +50,13 @@ div#navbar {
 
 div#logout_block {
 	float: right;
+	font-size: 120%;
+	font-weight: bold;
+	color: #310708;
+}
+
+div#logout_block a:visited{
+	color: #310708;
 }
 
 div#navbar p.navcurrent{
@@ -91,6 +98,7 @@ body#indexlogin div#container{
 
 div#container div.wrapper h1{
 	display: inline-block;
+	color: #310708;
 }
 
 body#dashboard div#class_summary{
@@ -107,6 +115,15 @@ body#dashboard div#class_summary{
 	width: 45%;
 	display: inline-block;
 	vertical-align: top;
+	margin-left: 2%;
+}
+
+body#dashboard div#class_summary h2{
+	color: #310708;
+}
+
+body#dashboard div#point_summary h2{
+	color: #310708;
 }
 
 body#dashboard div#point_summary{
@@ -123,6 +140,12 @@ body#dashboard div#point_summary{
 	width: 45%;
 	display: inline-block;
 	vertical-align: top;
+	margin-right: 2%;
+	float: right;
+}
+
+body#dashboard div#point_summary div.hide_cats{
+	display: none;
 }
 
 body#dashboard div#point_summary div.pt_line_wrapper {
