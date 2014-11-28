@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang='en' dir='ltr'>
 <?php
 include_once('common_functions.php');
 sec_session_start();
@@ -96,8 +98,9 @@ if(login_check())
 							}
 						}else
 							echo 'There was a database error. Try again later.';
-					
-						echo '					<div class="singleclass"><div class="class_name">'.$class_name.'</div><div class="wrapper"><div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div><div class="class_letter_grade">'.print_letter_grade($total_points_earned/$class_max_points)."</div></div></div>\n";
+							
+						$class_percent = $class_max_points == 0 ? -1 : $total_points_earned/$class_max_points;
+						echo '					<div class="singleclass"><div class="class_name">'.$class_name.'</div><div class="wrapper">'; echo $class_percent == -1 ? '<div class="class_points">No grades recorded</div>' : '<div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div>'; echo '<div class="class_letter_grade">'.print_letter_grade($class_percent)."</div></div></div>\n";
 					}
 					mysqli_close($link);
 					mysqli_close($link2);
@@ -163,11 +166,38 @@ if(login_check())
 						//print_r($reward_points);
 ?>
 				</div>
+				<br>
+				<br>
+				<a href="class.php?o=add" target="add_class_window">Add A Class</a>
 			</div>
 		</div>
 <?php
 }else{
 	// not logged in.
+?>
+	<head>
+		<meta charset="urf-8">
+		<link rel="stylesheet" type="text/css" href="custom.css.php">
+		<title>Error: Not Logged In</title>
+	</head>
+	<body id="loginError">
+		<div id="page_content">
+			<div id="banner">
+			<h1>Ivy-League STS</h1>
+			</div>
+			<div id="navbar">
+				<?php print_navbar_items(); ?>
+			</div>
+			<div id="container">
+				<h2>You're not even logged in.</h2>
+				<h3>Security Error: You are trying to access a secure page while not logged in.</h3>
+<?php
+	$entry = "Direct visit to ".$_SERVER['PHP_SELF']." from IP ".$_SERVER['REMOTE_ADDR'].". [".date_with_micro('Y-m-d H:i:s:u')."]\n";
+	file_put_contents("logs/security.txt", $entry, FILE_APPEND | LOCK_EX);
+?>
+			</div>
+		</div>
+<?php
 }
 ?>
 	</body>

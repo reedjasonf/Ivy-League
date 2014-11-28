@@ -1,1 +1,2 @@
 Direct visit to /scholarbowl/login.php from IP 10.106.37.133. [2014-11-21 05:08:21:558665] //test with Zeph's laptop on MS&T network
+Direct visit to /scholarbowl/Ivy-League/dashboard.php from IP ::1. [2014-11-26 04:48:33:187317]

@@ -1,7 +1,16 @@
 <?php
 include_once ('../../../scholarbowl_config.php');
 function connect_db_read(){
-	$link = mysqli_connect(HOST,USER,PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
+	$link = mysqli_connect(HOST,READ_USER,READ_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
+	if(mysqli_connect_errno()) {
+		printf("Connect to database failed: %s\n", mysqli_connect_error());
+		return false;
+	}else
+		return $link;
+}
+
+function connect_db_insert(){
+	$link = mysqli_connect(HOST,INSERT_USER,INSERT_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
 	if(mysqli_connect_errno()) {
 		printf("Connect to database failed: %s\n", mysqli_connect_error());
 		return false;
@@ -114,7 +123,8 @@ function print_letter_grade($percentage) {
 		return "D-";
 	elseif($percentage >= .575 && $percentage < .6)
 		return "F+";
-	else
+	elseif($percentage == -1)
+		return "";
 		return "F";
 }
 

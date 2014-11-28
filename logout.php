@@ -51,7 +51,7 @@ session_destroy();
 			<div id="navbar">
 				<?php print_navbar_items(); ?>
 			</div>
-			<div id="container"
+			<div id="container">
 				<h2>We don't know what you were trying to do... but it didn't work.</h2>
 				<h3>Click here if not returned to the homepage automatically</h3>
 			</div>
