@@ -1,7 +1,16 @@
 <?php
 include_once ('../../../scholarbowl_config.php');
 function connect_db_read(){
-	$link = mysqli_connect(HOST,USER,PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
+	$link = mysqli_connect(HOST,READ_USER,READ_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
+	if(mysqli_connect_errno()) {
+		printf("Connect to database failed: %s\n", mysqli_connect_error());
+		return false;
+	}else
+		return $link;
+}
+
+function connect_db_insert(){
+	$link = mysqli_connect(HOST,INSERT_USER,INSERT_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
 	if(mysqli_connect_errno()) {
 		printf("Connect to database failed: %s\n", mysqli_connect_error());
 		return false;
@@ -30,6 +39,56 @@ function sec_session_start() {
     session_name($session_name);
     session_start();            // Start the PHP session 
     session_regenerate_id(TRUE);    // regenerated the session, delete the old one. 
+}
+
+function login_check() {
+	$mysqli = connect_db_read();
+    // Check if all session variables are set 
+    if (isset($_SESSION['uid'], 
+						$_SESSION['logged'],
+                        $_SESSION['username'], 
+                        $_SESSION['login_string'])) {
+ 
+        $user_id = $_SESSION['uid'];
+        $login_string = $_SESSION['login_string'];
+        $username = $_SESSION['username'];
+ 
+        // Get the user-agent string of the user.
+        $user_browser = $_SERVER['HTTP_USER_AGENT'];
+ 
+        if ($stmt = $mysqli->prepare("SELECT hashword 
+                                      FROM users 
+                                      WHERE id = ? LIMIT 1")) {
+            // Bind "$user_id" to parameter. 
+            $stmt->bind_param('i', $user_id);
+            $stmt->execute();   // Execute the prepared query.
+            $stmt->store_result();
+ 
+            if ($stmt->num_rows == 1) {
+                // If the user exists get variables from result.
+                $stmt->bind_result($password);
+                $stmt->fetch();
+                $login_check = hash('sha512', $password . $user_browser);
+ 
+                if ($login_check == $login_string) {
+                    // Logged In!!!! 
+                    return true;
+                } else {
+                    // Not logged in 
+                    return false;
+                }
+            } else {
+                // Not logged in 
+                return false;
+            }
+        } else {
+            // Not logged in 
+            return false;
+        }
+    } else {
+        // Not logged in 
+        return false;
+    }
 }
 
 function print_navbar_items() {
@@ -64,7 +123,8 @@ function print_letter_grade($percentage) {
 		return "D-";
 	elseif($percentage >= .575 && $percentage < .6)
 		return "F+";
-	else
+	elseif($percentage == -1)
+		return "";
 		return "F";
 }
 
@@ -258,5 +318,4 @@ function fetch_assignment_percents($cat_id) {
 	mysqli_close($link);
 	return $myArray;
 }
-
 ?>
