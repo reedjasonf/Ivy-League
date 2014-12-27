@@ -1,5 +1,12 @@
 <?php
 include_once('common_functions.php');
+
+if(COMPRESSION == TRUE){
+	ob_start("ob_gzhandler");
+}
+sec_session_start();
+include_once('passwordhash.php');
+
 ?>
 <!DOCTYPE html>
 <html lang='en' dir='ltr'>
@@ -13,9 +20,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		$username_err = "Username is required.";
 	}else{
 		$username = test_input($_POST['username_fld']);
-		if(!preg_match("/^[a-zA-Z0-9]*$/",$username))
+		if(!preg_match("/^[a-zA-Z][a-zA-Z0-9-_]{5,35}$/",$username))
 		{
-			$username_err = "Only alphanumeric characters allowed.";
+			$username_err = "Username must start with A-Z and only contain letters, numbers, hyphen, and underscoreand be between 6 and 36 characters.";
 		}
 	}
 	
@@ -23,7 +30,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 	// we could do this with javascript too but this is an easy workaround for the time being.
 	if($_POST['hashed'] == 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
 	{
-		$password_err = "Password is required.";
+		$password_err = "Password must not be blank.";
 	}else{
 		$hashword = $_POST['hashed'];
 		
@@ -40,7 +47,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 				$username_err = "Username not recognized.";
 			}else{
 				// check the submitted hash against the stored hash
-				if($db_hashword != $hashword)
+				if(!validate_password($hashword, $db_hashword))
 				{
 					$password_err = "Password Incorrect";
 				}
@@ -63,8 +70,8 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 				$('#login_btn').click(function() {
 					hash = Sha256.hash($('#password_fld').val());
 					$('#hashed').val(hash);
+					$('#password_fld').removeAttr('required');
 					$('#password_fld').val("");
-					//alert(hash);
 				});
 			});
 		</script>
@@ -75,11 +82,10 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 				<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>">
 					<fieldset>
 						<legend lang="en" dir="ltr">Log In</legend>
-						<input type="text" name="username_fld" id="username_fld"><p class="field_error"><?php echo $username_err; ?></p><br>
-						<input type="password" name="password_fld" id="password_fld"><p class="field_error"><?php echo $password_err ?></p><br>
-						<input type="hidden" name="hashed" id="hashed">
+						<label for="username_fld">Username: *</label><input type="text" name="username_fld" id="username_fld" required><p class="field_error"><?php echo $username_err; ?></p><br>
+						<label for="password_fld">Password: *</label><input type="password" name="password_fld" id="password_fld" required><p class="field_error"><?php echo $password_err ?></p><br>
+						<input type="hidden" name="hashed" id="hashed"><br>
 						<input type="submit" id="login_btn" value="Log In"><br>
-						<br>
 						Don't have an account? <a href="create_account.php">Create One</a><br>
 						<a href="account.php?q=forgot_username">Forgot Username?</a><br>
 						<a href="account.php?q=forgot_password">Forgot Password?</a>
@@ -90,14 +96,15 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 <?php
 }else{
 	// Form submitted correctly and no errors so let's log the user in already.
-	sec_session_start();
-	if($hashword == $db_hashword)
-	$_SESSION['logged'] = True;
-	$_SESSION['uid'] = $uid;
-	$_SESSION['username'] = $username;
-	$_SESSION['login_string'] = hash('sha512', $hashword . $_SERVER['HTTP_USER_AGENT']);
-	
+	//sec_session_start();
+	if(validate_password($hashword, $db_hashword))
+	{
+		$_SESSION['logged'] = True;
+		$_SESSION['uid'] = $uid;
+		$_SESSION['username'] = $username;
+		$_SESSION['login_string'] = hash('sha512', $db_hashword . $_SERVER['HTTP_USER_AGENT']);
+		header("Location: dashboard.php");
+	}
 	//send the user to the dashboard page
-	header("Location: dashboard.php");
 }
 ?>

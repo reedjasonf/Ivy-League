@@ -1,5 +1,6 @@
 <?php
 include_once ('../../../scholarbowl_config.php');
+
 function connect_db_read(){
 	$link = mysqli_connect(HOST,READ_USER,READ_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
 	if(mysqli_connect_errno()) {
@@ -16,6 +17,32 @@ function connect_db_insert(){
 		return false;
 	}else
 		return $link;
+}
+
+function m_empty()
+{
+    foreach(func_get_args() as $arg)
+        if(empty($arg))
+            continue;
+        else
+            return false;
+    return true;
+}
+
+function userexists($un)
+{
+	$db_link = connect_db_read();
+	if($un_stmt = mysqli_prepare($db_link, "SELECT 1 FROM `users` WHERE username = ?"))
+	{
+		mysqli_stmt_bind_param($un_stmt, "s", $un);
+		mysqli_stmt_execute($un_stmt);
+		mysqli_stmt_store_result($un_stmt);
+		if(mysqli_stmt_num_rows($un_stmt) == 0)
+			return false;
+		elseif(mysqli_stmt_num_rows($un_stmt) >= 1)
+			return true;
+	}else
+		return NULL;
 }
 
 function sec_session_start() {
@@ -44,10 +71,7 @@ function sec_session_start() {
 function login_check() {
 	$mysqli = connect_db_read();
     // Check if all session variables are set 
-    if (isset($_SESSION['uid'], 
-						$_SESSION['logged'],
-                        $_SESSION['username'], 
-                        $_SESSION['login_string'])) {
+    if (isset($_SESSION['uid'], $_SESSION['logged'], $_SESSION['username'], $_SESSION['login_string'])) {
  
         $user_id = $_SESSION['uid'];
         $login_string = $_SESSION['login_string'];
@@ -56,9 +80,7 @@ function login_check() {
         // Get the user-agent string of the user.
         $user_browser = $_SERVER['HTTP_USER_AGENT'];
  
-        if ($stmt = $mysqli->prepare("SELECT hashword 
-                                      FROM users 
-                                      WHERE id = ? LIMIT 1")) {
+        if ($stmt = $mysqli->prepare("SELECT hashword FROM users WHERE id = ? LIMIT 1")) {
             // Bind "$user_id" to parameter. 
             $stmt->bind_param('i', $user_id);
             $stmt->execute();   // Execute the prepared query.
@@ -69,12 +91,12 @@ function login_check() {
                 $stmt->bind_result($password);
                 $stmt->fetch();
                 $login_check = hash('sha512', $password . $user_browser);
- 
+				
                 if ($login_check == $login_string) {
                     // Logged In!!!! 
                     return true;
                 } else {
-                    // Not logged in 
+                    // Not logged in
                     return false;
                 }
             } else {
@@ -92,7 +114,8 @@ function login_check() {
 }
 
 function print_navbar_items() {
-	echo '<p class="navcurrent">Home</p>
+	$loggedIn = login_check();
+	echo '<p class="'; echo $_SERVER['PHP_SELF'] == '/scholarbowl/Ivy-League/dashboard.php' ? 'navcurrent' : 'navlink'; echo '"><a href="';echo $loggedIn==True ? 'dashboard.php' : 'index.php'; echo '">Home</a></p>
 				<p class="navlink">About</p>';
 }
 
@@ -199,6 +222,24 @@ function get_class_max_points($class_id) {
 	return $var;
 }
 
+function class_categories_names($class_id) {
+	$myArray = [];
+	$link = connect_db_read();
+		if($cat_stmt = mysqli_prepare($link, "SELECT id, name FROM `grade_categories` WHERE class = ?"))
+		{
+			mysqli_stmt_bind_param($cat_stmt, "i", $class_id);
+			mysqli_stmt_execute($cat_stmt);
+			mysqli_stmt_bind_result($cat_stmt, $cat_id, $cat_name);
+			while(mysqli_stmt_fetch($cat_stmt))
+			{
+				$myArray[$cat_id] = $cat_name;
+			}
+		}else
+			$myArray = False;
+	mysqli_close($link);
+	return $myArray;
+}
+
 function get_class_categories($class_id) {
 	$myArray = [];
 	$link = connect_db_read();
@@ -238,6 +279,36 @@ function category_name($cat_id) {
 		mysqli_stmt_bind_result($cat_stmt, $cat_name);
 		mysqli_stmt_fetch($cat_stmt);
 		$var = $cat_name;
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function category_pts_earned($cat_id) {
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT SUM(points_earned) FROM `grades` WHERE category = ?"))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $cat_id);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $points_earned);
+		mysqli_stmt_fetch($stmt);
+		$var = number_format($points_earned,2);
+	}else
+		$var = False;
+	mysqli_close($link);
+	return $var;
+}
+
+function category_pts_offered($cat_id) {
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT SUM(max_points) FROM `grades` WHERE category = ?"))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $cat_id);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $points_offered);
+		mysqli_stmt_fetch($stmt);
+		$var = number_format($points_offered, 2);
 	}else
 		$var = False;
 	mysqli_close($link);
