@@ -29,13 +29,13 @@ $posx = 0;
 for($s=0; $s<strlen($passphrase); $s++)
 {	
 	$posx += rand(28,36);
-	imagettftext($image, 32, 0, $posx, rand(40,70), $white, 'ttf\Alido.otf', $passphrase[$s]);
+	imagettftext($image, 32, rand(-25,30), $posx, rand(40,70), $white, 'ttf\Alido.otf', $passphrase[$s]);
 }
 // creates horizontal squiggles
 for($j=-5; $j < 8; $j++)
 {
 	$offset = rand(0,8);
-	for($i=0; $i < 312; $i++)
+	for($i=0; $i < 400; $i++)
 	{
 		$y = $j*26+($i/$slope)*cos(($i+$offset)/$period)+($i)/7;
 		imagesetpixel($image, $i, $y, $white);
@@ -65,4 +65,5 @@ for($j=-3; $j < 20; $j++)
 header("Content-type: image/png");
 imagepng($image);
 imagedestroy($image);
+unset($passphrase);
 ?>

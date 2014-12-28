@@ -9,9 +9,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST")
 		mysqli_stmt_execute($un_stmt);
 		mysqli_stmt_store_result($un_stmt);
 		if(mysqli_stmt_num_rows($un_stmt) == 0)
-			echo '<p class="field_good"> Username available</p>';
+			echo 'Username available';
 		elseif(mysqli_stmt_num_rows($un_stmt) >= 1)
-			echo '<p class="field_error"> Username Taken</p>';
+			echo 'Username Taken';
 	}
 }else
 	echo '<p class="field_error"> Error: POST method not used</p>';

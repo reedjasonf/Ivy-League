@@ -5,9 +5,8 @@ if(COMPRESSION == TRUE){
 	ob_start("ob_gzhandler");
 }
 include_once('passwordhash.php');
-sec_session_start();
 
-$username_err = $password_err = $name_err = $email_err = $privacy_err = $terms_err = "";
+$username_err = $password_err = $name_err = $email_err = $privacy_err = $terms_err = $captcha_err = "";
 if($_SERVER["REQUEST_METHOD"] == "POST")
 {
 	// preprocess the fields for user errors and hacking attempts
@@ -61,9 +60,20 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		$privacy_err = 'The privacy policy must be accepted.';
 	if(empty($_POST['terms']))
 		$terms_err = 'The Terms of Service must be accepted.';
+		
+	if(empty($_POST['captchaGuessFld']))
+		$captcha_err = 'You must authenticate yourself as human.';
+	else{
+		$captcha_guess = test_input($_POST['captchaGuessFld']);
+		$captcha_guess = hash("sha256", strtolower($captcha_guess));
+		if($captcha_guess != $_SESSION['recaptcha'])
+		{
+			$captcha_err = 'String does not match. Try again!';
+		}
+	}
 	
 	// if no errors, submit data to database
-	if(m_empty($email_err, $password_err, $name_err, $username_err, $privacy_err, $terms_err))
+	if(m_empty($email_err, $password_err, $name_err, $username_err, $privacy_err, $terms_err, $captcha_err))
 	{
 		// create a salt and create the hash string for the db
 		$hash = create_hash($hashword);
@@ -71,6 +81,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		$stmt = mysqli_prepare($dblink, "INSERT INTO `users` (`id`, `username`, `hashword`, `org`, `team`, `first_name`, `last_name`, `email`) VALUES (NULL, ?, ?, NULL, NULL, ?, ?, ?)") or die(mysqli_error($dblink));
 		mysqli_stmt_bind_param($stmt, "sssss", $username, $hash, $firstname, $lastname, $email);
 		mysqli_stmt_execute($stmt) or die(mysqli_error($dblink));
+		mysqli_close($dblink);
 ?>
 <!DOCTYPE>
 <html>
@@ -155,7 +166,7 @@ error:
 						<label for="privacy">I have read and accept the terms of the <a href="privacy_policy.html" target="_blank">privacy policy</a>*</label><input type="checkbox" name="privacy" id="privacy" required><p class="field_error"><?php echo $privacy_err; ?></p><br>
 						<label for="terms">I have read and accept the <a href="TermsofService.html" target="_blank">Terms of Service.</a>*</label><input type="checkbox" name="terms" id="terms" required><p class="field_error"><?php echo $terms_err; ?></p><br>
 						<image src="captcha_image.php" alt="Captcha image" style="margin-left:2em"><br>
-						<label for="captchaGuessFld">Type the characters to prove you aren't a script: *</label><input type="text" name="captchaGuessFld" id="captchaGuessFld">
+						<label for="captchaGuessFld">Type the characters to prove you are human: *</label><input type="text" name="captchaGuessFld" id="captchaGuessFld" autocomplete="off" required><p class="field_error"><?php echo $captcha_err; ?></p><br>
 					</fieldset>
 					<br>
 					<input type="submit" value="Create Account" id="create_btn">

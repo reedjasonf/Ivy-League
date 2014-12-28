@@ -16,8 +16,9 @@ function UserExists(un)
 		xmlhttp.onreadystatechange = function() {
 			if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
 				document.getElementById("username_error").innerHTML = xmlhttp.responseText;
-				if(document.getElementById("username_error").innerHTML == 'Username available') {
+				if(xmlhttp.responseText == 'Username available') {
 					document.getElementById("username_error").style.color = 'green';
+					document.getElementById("create_btn").removeAttribute('disabled');
 				}else{
 					document.getElementById("username_error").style.color = 'red';
 					document.getElementById("create_btn").disabled = 'True';
