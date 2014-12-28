@@ -1,14 +1,19 @@
-<!DOCTYPE html>
-<html lang='en' dir='ltr'>
 <?php
 include_once('common_functions.php');
 sec_session_start();
+if(COMPRESSION == TRUE){
+	ob_start("ob_gzhandler");
+}
+?>
+<!DOCTYPE html>
+<html lang='en' dir='ltr'>
+<?php
 if(login_check())
 {
 	// logged in correctly
 
 	$link = connect_db_read();
-	if($class_stmt = mysqli_prepare($link, "SELECT id, name, total_pts FROM `classes` WHERE student = ?"))
+	if($class_stmt = mysqli_prepare($link, "SELECT id, name, total_pts FROM `classes` WHERE student = ? AND archived = 0"))
 	{
 		mysqli_stmt_bind_param($class_stmt, "i", $_SESSION['uid']);
 		mysqli_stmt_execute($class_stmt);
@@ -41,8 +46,7 @@ if(login_check())
 			<h1>Ivy-League STS</h1>
 			</div>
 			<div id="navbar">
-				<p class="navcurrent">Home</p>
-				<p class="navlink">About</p>
+				<?php print_navbar_items(); ?>
 			</div>
 			<div id="container">
 				<div class="wrapper">
@@ -95,16 +99,16 @@ if(login_check())
 									$total_points_earned += $category_points;
 								}else
 									echo 'There was a database error. Try again later.';
+								mysqli_close($link3);
 							}
 						}else
 							echo 'There was a database error. Try again later.';
 							
 						$class_percent = $class_max_points == 0 ? -1 : $total_points_earned/$class_max_points;
-						echo '					<div class="singleclass"><div class="class_name">'.$class_name.'</div><div class="wrapper">'; echo $class_percent == -1 ? '<div class="class_points">No grades recorded</div>' : '<div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div>'; echo '<div class="class_letter_grade">'.print_letter_grade($class_percent)."</div></div></div>\n";
+						echo '					<div class="singleclass"><div class="class_name"><a href="class.php?o=details&amp;q='.$class_id.'">'.$class_name.'</a></div><div class="wrapper">'; echo $class_percent == -1 ? '<div class="class_points">No grades recorded</div>' : '<div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div>'; echo '<div class="class_letter_grade">'.print_letter_grade($class_percent)."</div></div></div>\n";
+						mysqli_close($link2);
 					}
 					mysqli_close($link);
-					mysqli_close($link2);
-					mysqli_close($link3);
 ?>
 				</div>
 				<div id="point_summary">
@@ -192,6 +196,7 @@ if(login_check())
 				<h2>You're not even logged in.</h2>
 				<h3>Security Error: You are trying to access a secure page while not logged in.</h3>
 <?php
+	echo $_SESSION['uid'].' '.$_SESSION['login_string'];
 	$entry = "Direct visit to ".$_SERVER['PHP_SELF']." from IP ".$_SERVER['REMOTE_ADDR'].". [".date_with_micro('Y-m-d H:i:s:u')."]\n";
 	file_put_contents("logs/security.txt", $entry, FILE_APPEND | LOCK_EX);
 ?>

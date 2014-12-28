@@ -1,9 +1,13 @@
-<!DOCTYPE html>
-<html lang='en' dir='ltr'>
 <?php
 include_once('common_functions.php');
 sec_session_start();
-
+if(COMPRESSION == TRUE){
+	ob_start("ob_gzhandler");
+}
+?>
+<!DOCTYPE html>
+<html lang='en' dir='ltr'>
+<?php
 if(login_check())
 {
 	switch($_GET['o'])
@@ -164,7 +168,129 @@ if(login_check())
 		</div>
 <?php
 			}
-		exit;
+		break; // end add case
+		
+		case "details":
+?>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="custom.css.php">
+		<title>Class Details</title>
+	</head>
+	<body id="class_details">
+		<div id="page_content">
+			<div id="banner">
+				<h1>Ivy-League STS</h1>
+			</div>
+			<div id="navbar">
+				<?php print_navbar_items(); ?>
+			</div>
+			<div id="container">
+				<div class="wrapper">
+					<h1>Class Details</h1>
+					<div id="logout_block">
+						<a href="logout.php">Logout</a>
+					</div>
+				</div>
+<?php
+		if(isset($_GET['q']))
+		{
+			// q will hold the class_id that we are Querying
+			$class_query_id = $_GET['q'];
+			$link = connect_db_read();
+			
+			if($stmt = mysqli_prepare($link, "SELECT `name`, `instructor`, `total_pts` from `classes` WHERE id = ? and student = ?"))
+			{
+				mysqli_stmt_bind_param($stmt, "ii", $class_query_id, $_SESSION['uid']);
+				
+				mysqli_stmt_execute($stmt);
+				mysqli_stmt_bind_result($stmt, $class_name, $class_instructor, $class_points);
+				$result = mysqli_use_result($link);
+				if(mysqli_stmt_fetch($stmt))
+				{
+?>
+				<h2>Details for <?php echo $class_name; ?> </h2>
+				<h3>Instructor: <?php echo $class_instructor; ?></h3>
+				<h3>Grades:</h3>
+				<div id="categories_section">
+<?php
+					mysqli_stmt_free_result($stmt);
+					$class_categories = class_categories_names($class_query_id);
+					foreach($class_categories as $cat_id => $category)
+					{
+						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a></p>';
+					}
+					/*if($categories_stmt = mysqli_prepare($link, "SELECT id, name, max_points FROM `grade_categories` WHERE class = ?"))
+					{
+						mysqli_stmt_bind_param($categories_stmt, "i", $class_query_id);
+						mysqli_stmt_execute($categories_stmt);
+						mysqli_stmt_bind_result($categories_stmt, $category_id, $category_name, $category_max_pts);
+						$link2 = connect_db_read();
+						if($grade_stmt = mysqli_prepare($link2, "SELECT points_earned, max_points FROM `grades` WHERE category = ?"))
+						while(mysqli_stmt_fetch($categories_stmt))
+						{
+							echo '<p class="category">'.$category_name.'</p>';
+							mysqli_stmt_bind_param($grade_stmt, "i", $category_id);
+							mysqli_stmt_execute($grade_stmt);
+							mysqli_stmt_bind_result($grade_stmt, $points, $max_points);
+							$i = 1;
+							while(mysqli_stmt_fetch($grade_stmt))
+							{
+								echo '<p class="assignment_grade">Entry # '.$i++.': '.$points.'/'.$max_points.'</p>';
+							}
+						}
+						
+						foreach($categories as $category)
+						{
+						
+						}
+					}else
+						echo 'Fatal Database Error! Try again later.'.mysqli_error($link);*/
+?>
+				</div>
+				<iframe name="category_details_window" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" frameborder="0" scrolling="yes" style="height:400px;width:45%;display:inline-block;">Your browser does not support frames</iframe>
+<?php
+				}else{
+					echo 'Class details couldn\'t be found';
+				}
+			}else{
+				echo 'Fatal Database Error! Try again later.';
+			}
+		}else
+			echo 'No class id provided';
+?>
+			</div>
+		</div>
+<?php
+		break; // end details case
+		case "category":
+			if(isset($_GET['q']))
+			{
+				$category_query_id = $_GET['q'];
+				$link = connect_db_read();
+				
+				if($grades_stmt = mysqli_prepare($link, "SELECT points_earned, max_points FROM grades WHERE category = ?"))
+				{
+					$k = 1;
+					mysqli_stmt_bind_param($grades_stmt, "i", $category_query_id);
+					mysqli_stmt_execute($grades_stmt);
+					mysqli_stmt_store_result($grades_stmt);
+					$results = mysqli_stmt_num_rows($grades_stmt);
+					mysqli_stmt_bind_result($grades_stmt, $points, $max_points);
+					if($results >= 1){
+						echo '<h3>Number of assignments: '.$results.'</h3>';
+						echo '<h3>Points Awarded: '.category_pts_earned($category_query_id).'</h3>';
+						echo '<h3>Points Offered: '.category_pts_offered($category_query_id).'</h3>';
+						while(mysqli_stmt_fetch($grades_stmt))
+						{
+							echo '<p>Assignment '.$k++.': '.$points.' out of '.$max_points.' points.</p>';
+						}
+					}else
+						echo 'No assignments entered in this category.';
+				}
+			}else
+				echo 'No category id provided';
+		break; // end category details case
 	}
 }else{
 	// Error: User not logged in

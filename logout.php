@@ -1,7 +1,10 @@
 <?php
 include_once('common_functions.php');
 sec_session_start();
-if(!empty($_SESSION) && isset($_SESSION) && isset($_SESSION['logged'])) {
+if(COMPRESSION == TRUE){
+	ob_start("ob_gzhandler");
+}
+if(login_check()) {
 	if(ini_get("session.use_cookies")) {
 		$params = session_get_cookie_params();
 		setcookie(session_name(), '', time()-42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
@@ -12,7 +15,7 @@ session_destroy();
 <html>
 	<head>
 		<meta charset="urf-8">
-		<meta http-equiv="refresh" content="5;URL=index.php"> 
+		<meta http-equiv="refresh" content="4;URL=index.php"> 
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>You have been logged out...</title>
 	</head>
@@ -26,7 +29,7 @@ session_destroy();
 			</div>
 			<div id="container">
 				<h2>You have been logged out...</h2>
-				<h3>Click here if not returned to the homepage automatically</h3>
+				<h3>Click <a href="index.php" lang="en" dir="ltr">here</a> if not returned to the homepage automatically</h3>
 			</div>
 		</div>
 	</body>

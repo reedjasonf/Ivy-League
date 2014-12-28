@@ -96,6 +96,32 @@ body#indexlogin div#container{
 	margin: 0 auto;
 }
 
+
+
+body#indexlogin div#container input[type=submit]{
+	margin-left: auto;
+	margin-right: auto;
+	width: 5em;
+	height: 2em;
+	display: block;
+}
+
+body#create_account_form div#container{
+	width: 50em;
+	text-align: left;
+	margin: 0 auto;
+	line-height: 1.45;
+}
+
+body#create_account_form input[type=submit]{
+	font-size: 110%;
+}
+
+body#create_account_form label{
+	margin-left: 2em;
+	font-size: 120%;
+}
+
 div#container div.wrapper h1{
 	display: inline-block;
 	color: #310708;
@@ -197,11 +223,54 @@ div#class_summary div.singleclass div.wrapper {
 	float: right;
 }
 
+body#class_details div#container p.category {
+	margin-left: 30px;
+}
+
+body#class_details div#container p.assignment_grade {
+	margin-left: 60px;
+}
+
 p.field_error {
 	display: inline;
 	color: #B4161A;
 	margin-left: 14px;
 	font-size: 130%;
+}
+
+p.field_good {
+	display: inline;
+	color: green;
+	margin-left: 14px;
+	font-size: 130%;
+}
+
+body#class_details div#page_content div#container div#categories_section {
+	border: #aaa solid 2px;
+	border-radius: 6px 4px 2px 2px;
+    -moz-border-radius: 6px 4px 2px 2px;
+    -webkit-border-radius: 6px 4px 2px 2px;
+	padding: 0.4em 1.2em;
+	background: #79A276;
+	text-shadow: 2px 2px #000 inset;
+    -moz-box-shadow: 10px 10px 2px #000 inset;
+    -webkit-box-shadow: 1px 1px 2px #000 inset;
+    box-shadow: 1px 1px 6px #fff inset;
+	width: 45%;
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 2%;
+}
+
+
+body#class_details div#page_content div#container iframe.category_details_window {
+	padding: 0.4em 1.2em;
+	width: 45%;
+	height: 500px;
+	display: inline-block;
+	vertical-align: top;
+	margin-right: 2%;
+	float: right;
 }
 
 fieldset {
