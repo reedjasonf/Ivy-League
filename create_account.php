@@ -124,6 +124,11 @@ error:
 		<script type="text/javascript" src="checkusername.ajax"></script>
 		<script type="text/javascript">
 			$(document).ready(function() {
+				$('#reload_captcha').click(function() {
+					$("#captcha_image").attr("src", "captcha_image.php?"+(new Date()).getTime());
+					return false;
+				});
+				
 				$('#create_btn').click(function() {
 					hash1 = Sha256.hash($('#password_pri_fld').val());
 					hash2 = Sha256.hash($('#password_sec_fld').val());
@@ -165,7 +170,8 @@ error:
 						<legend lang="en" dir="ltr">Legal Terms & Verification</legend>
 						<label for="privacy">I have read and accept the terms of the <a href="privacy_policy.html" target="_blank">privacy policy</a>*</label><input type="checkbox" name="privacy" id="privacy" required><p class="field_error"><?php echo $privacy_err; ?></p><br>
 						<label for="terms">I have read and accept the <a href="TermsofService.html" target="_blank">Terms of Service.</a>*</label><input type="checkbox" name="terms" id="terms" required><p class="field_error"><?php echo $terms_err; ?></p><br>
-						<image src="captcha_image.php" alt="Captcha image" style="margin-left:2em"><br>
+						<image src="captcha_image.php" alt="Captcha image" id="captcha_image" style="margin-left:2em"><br>
+						<a href="#" id="reload_captcha" name="reload_captcha">Load New Image</a><br>
 						<label for="captchaGuessFld">Type the characters to prove you are human: *</label><input type="text" name="captchaGuessFld" id="captchaGuessFld" autocomplete="off" required><p class="field_error"><?php echo $captcha_err; ?></p><br>
 					</fieldset>
 					<br>

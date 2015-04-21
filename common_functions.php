@@ -174,10 +174,10 @@ function date_with_micro($format, $timestamp = null) {
 	return date($format_with_micro, $timestamp_int);
 }
 
-function get_user_classes($user_id) {
+function get_user_classes($user_id, $archived_classes = 0) {
 	$myArray = [];
 	$link = connect_db_read();
-	if($class_stmt = mysqli_prepare($link, "SELECT id FROM `classes` WHERE student = ?"))
+	if($class_stmt = mysqli_prepare($link, "SELECT id FROM `classes` WHERE student = ? AND archived = ".$archived_classes))
 	{
 		mysqli_stmt_bind_param($class_stmt, "i", $user_id);
 		mysqli_stmt_execute($class_stmt);
@@ -382,7 +382,8 @@ function fetch_assignment_percents($cat_id) {
 		mysqli_stmt_bind_result($grades_stmt, $pts_earned, $pts_available);
 		while(mysqli_stmt_fetch($grades_stmt))
 		{
-			$myArray[] = $pts_earned/$pts_available;
+			if($pts_available > 0)
+				$myArray[] = $pts_earned/$pts_available;
 		}
 	}else
 		$myArray = False;
