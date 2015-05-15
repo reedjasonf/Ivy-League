@@ -127,6 +127,31 @@ div#container div.wrapper h1{
 	color: #310708;
 }
 
+body#class_details div#scroll_form_edit_grade{
+	top: -400px; /* start off the screen */
+	width: 30%;
+	position: fixed;
+	margin: 0 0 0 -15%;
+	left: 50%;
+	height: 200px;
+	display: box;
+	background-color: #465150;
+	color: white;
+	border: #aaa solid 2px;
+	border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+}
+
+body#class_details div#scroll_form_edit_grade form div.centered{
+	width: 90%;
+	margin: 30px auto;
+}
+
+span.edit-grade{
+	cursor: pointer;
+}
+
 body#dashboard div#class_summary{
 	border: #aaa solid 2px;
 	border-radius: 6px 4px 2px 2px;
@@ -271,6 +296,8 @@ body#class_details div#page_content div#container iframe.category_details_window
 	vertical-align: top;
 	margin-right: 2%;
 	float: right;
+	scrolling: yes;
+	frameborder: 0;
 }
 
 fieldset {

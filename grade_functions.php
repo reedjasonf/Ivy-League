@@ -17,21 +17,29 @@ function print_summary_all_classes($uid) {
 		$link2 = connect_db_read();
 		$class_max_points = 0;
 		$total_points_earned = 0;
-		if($categories_stmt = mysqli_prepare($link2, "SELECT id, max_points FROM `grade_categories` WHERE class = ?"))
+		if($categories_stmt = mysqli_prepare($link2, "SELECT id, max_points, drop_after FROM `grade_categories` WHERE class = ?"))
 		{
 			mysqli_stmt_bind_param($categories_stmt, "i", $class_id);
 			mysqli_stmt_execute($categories_stmt);
-			mysqli_stmt_bind_result($categories_stmt, $category_id, $category_max_pts);
+			mysqli_stmt_bind_result($categories_stmt, $category_id, $category_max_pts, $category_drop_after);
 			while(mysqli_stmt_fetch($categories_stmt))
 			{
 				$class_max_points += $category_max_pts;
 				$link3 = connect_db_read();
 				// get the grade entries for the current category
-				if($grades_stmt = mysqli_prepare($link3, "SELECT id, points_earned, max_points FROM grades WHERE category = ?"))
+				if($category_drop_after != 0){
+					$grades_stmt = mysqli_prepare($link3, "SELECT id, points_earned, max_points FROM grades WHERE category = ? ORDER BY points_earned/max_points DESC LIMIT ?");
+					if($grades_stmt)
+						mysqli_stmt_bind_param($grades_stmt, "ii", $category_id, $category_drop_after);
+				}else{
+					$grades_stmt = mysqli_prepare($link3, "SELECT id, points_earned, max_points FROM grades WHERE category = ?");
+					if($grades_stmt)
+						mysqli_stmt_bind_param($grades_stmt, "i", $category_id);
+				}
+				if($grades_stmt)
 				{
 					$points = 0;
 					$cat_max = 0;
-					mysqli_stmt_bind_param($grades_stmt, "i", $category_id);
 					mysqli_stmt_execute($grades_stmt);
 					mysqli_stmt_store_result($grades_stmt);
 					if(mysqli_stmt_num_rows($grades_stmt) == 0)
