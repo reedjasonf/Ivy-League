@@ -178,6 +178,17 @@ if(login_check())
 		<title>Class Details</title>
 	</head>
 	<body id="class_details">
+	<div id="scroll_form_edit_grade">
+		<form method="POST" action="">
+		<div class="centered">
+			<label for="description">Description (ie "Homework 2", "Exam 1", etc): </label><input type="text" name="description"/><br>
+			Points: <input type="number" name="points" min="0" /> / <input type="number" name="max_points" min="0" />
+			<br>
+			<br>
+			<input type="submit" />
+		</div>
+		</form>
+	</div>
 		<div id="page_content">
 			<div id="banner">
 				<h1>Ivy-League STS</h1>
@@ -185,7 +196,7 @@ if(login_check())
 			<div id="navbar">
 				<?php print_navbar_items(); ?>
 			</div>
-			<div id="container">
+			<div id="container" style="min-height:75%">
 				<div class="wrapper">
 					<h1>Class Details</h1>
 					<div id="logout_block">
@@ -248,7 +259,10 @@ if(login_check())
 						echo 'Fatal Database Error! Try again later.'.mysqli_error($link);*/
 ?>
 				</div>
-				<iframe name="category_details_window" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" frameborder="0" scrolling="yes" style="height:400px;width:45%;display:inline-block;">Your browser does not support frames</iframe>
+				<iframe id="category_details_window" name="category_details_window" style="min-height:30em;margin-right:2%;width:45%;float:right;display:inline-block;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" style="height:400px;width:45%;display:inline-block;">Your browser does not support frames</iframe>
+				<br>
+				<br>
+				<a href="">Add Category</a>
 <?php
 				}else{
 					echo 'Class details couldn\'t be found';
@@ -264,32 +278,41 @@ if(login_check())
 <?php
 		break; // end details case
 		case "category":
+			echo '	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="custom.css.php">
+		<title>Category Details</title>
+	</head>
+	<body>';
 			if(isset($_GET['q']))
 			{
 				$category_query_id = $_GET['q'];
 				$link = connect_db_read();
 				
-				if($grades_stmt = mysqli_prepare($link, "SELECT points_earned, max_points FROM grades WHERE category = ?"))
+				if($grades_stmt = mysqli_prepare($link, "SELECT points_earned, max_points, description FROM grades WHERE category = ?"))
 				{
 					$k = 1;
 					mysqli_stmt_bind_param($grades_stmt, "i", $category_query_id);
 					mysqli_stmt_execute($grades_stmt);
 					mysqli_stmt_store_result($grades_stmt);
 					$results = mysqli_stmt_num_rows($grades_stmt);
-					mysqli_stmt_bind_result($grades_stmt, $points, $max_points);
+					mysqli_stmt_bind_result($grades_stmt, $points, $max_points, $description);
 					if($results >= 1){
 						echo '<h3>Number of assignments: '.$results.'</h3>';
-						echo '<h3>Points Awarded: '.category_pts_earned($category_query_id).'</h3>';
+						echo '<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2).'</h3>';
 						echo '<h3>Points Offered: '.category_pts_offered($category_query_id).'</h3>';
 						while(mysqli_stmt_fetch($grades_stmt))
 						{
-							echo '<p>Assignment '.$k++.': '.$points.' out of '.$max_points.' points.</p>';
+							echo '		<p style="display:inline-block;line-height:5%;">Assignment '.$k++.': '.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <span class="edit-grade">edit</span><br>
+';
 						}
 					}else
 						echo 'No assignments entered in this category.';
 				}
 			}else
 				echo 'No category id provided';
+echo '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="app.js"></script>';
 		break; // end category details case
 	}
 }else{
