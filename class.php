@@ -259,7 +259,7 @@ if(login_check())
 						echo 'Fatal Database Error! Try again later.'.mysqli_error($link);*/
 ?>
 				</div>
-				<iframe id="category_details_window" name="category_details_window" style="min-height:30em;margin-right:2%;width:45%;float:right;display:inline-block;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" style="height:400px;width:45%;display:inline-block;">Your browser does not support frames</iframe>
+				<iframe id="category_details_window" name="category_details_window" style="min-height:30em;margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" >Your browser does not support frames</iframe>
 				<br>
 				<br>
 				<a href="">Add Category</a>

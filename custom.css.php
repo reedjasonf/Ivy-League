@@ -297,7 +297,7 @@ body#class_details div#page_content div#container iframe.category_details_window
 	margin-right: 2%;
 	float: right;
 	scrolling: yes;
-	frameborder: 0;
+	border: 0px;
 }
 
 fieldset {
