@@ -229,7 +229,7 @@ if(login_check())
 					$class_categories = class_categories_names($class_query_id);
 					foreach($class_categories as $cat_id => $category)
 					{
-						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a></p>';
+						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <a href="'.$cat_id.'"><img src="images/insert.gif" /></a></p>';
 					}
 					/*if($categories_stmt = mysqli_prepare($link, "SELECT id, name, max_points FROM `grade_categories` WHERE class = ?"))
 					{

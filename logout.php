@@ -11,7 +11,7 @@ if(login_check()) {
 	}
 session_destroy();
 ?>
-<!DOCTYPE>
+<!DOCTYPE html>
 <html>
 	<head>
 		<meta charset="urf-8">

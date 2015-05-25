@@ -115,7 +115,7 @@ function login_check() {
 
 function print_navbar_items() {
 	$loggedIn = login_check();
-	echo '<p class="'; echo $_SERVER['PHP_SELF'] == '/scholarbowl/Ivy-League/dashboard.php' ? 'navcurrent' : 'navlink'; echo '"><a href="';echo $loggedIn==True ? 'dashboard.php' : 'index.php'; echo '">Home</a></p>
+	echo '<p class="'; echo $_SERVER['PHP_SELF'] == '/Ivy-League/dashboard.php' ? 'navcurrent' : 'navlink'; echo '"><a href="';echo ($loggedIn==True && $_SERVER['PHP_SELF'] != '/Ivy-League/logout.php') ? 'dashboard.php' : 'index.php'; echo '">Home</a></p>
 				<p class="navlink">About</p>';
 }
 
