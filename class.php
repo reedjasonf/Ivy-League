@@ -171,6 +171,13 @@ if(login_check())
 		break; // end add case
 		
 		case "details":
+			if($_SERVER['REQUEST_METHOD'] == 'POST')
+			{
+				$link = connect_db_update();
+				$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
+				mysqli_stmt_bind_param($stmt, "siii", $_POST["description"], $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
+				mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+			}
 ?>
 	<head>
 		<meta charset="utf-8">
@@ -178,14 +185,16 @@ if(login_check())
 		<title>Class Details</title>
 	</head>
 	<body id="class_details">
+	<img src="images/lockout.png" width="100%" height="100%" id="lockoutImg" style="position: absolute;left: 0px;top: 0px;z-index: 100;display: none;"/>
 	<div id="scroll_form_edit_grade">
 		<form method="POST" action="">
+		<img id="hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;"/>
 		<div class="centered">
-			<label for="description">Description (ie "Homework 2", "Exam 1", etc): </label><input type="text" name="description"/><br>
-			Points: <input type="number" name="points" min="0" /> / <input type="number" name="max_points" min="0" />
+			<label for="description">Description: </label><input type="text" id="editFormDesc" name="description"/><br>
+			Points: <input type="number" id="editFormEarned" name="points" min="0" size="4" style="width:4em;"/> / <input type="number" id="editFormMax" name="max_points" min="0" size="4" style="width:4em;"/>
 			<br>
 			<br>
-			<input type="submit" />
+			<input type="submit" value="Edit Grade"/><input type="hidden" name="hiddenID" id="hiddenID" value="" />
 		</div>
 		</form>
 	</div>
@@ -229,7 +238,7 @@ if(login_check())
 					$class_categories = class_categories_names($class_query_id);
 					foreach($class_categories as $cat_id => $category)
 					{
-						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <a href="'.$cat_id.'"><img src="images/insert.gif" /></a></p>';
+						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <a href="'.$cat_id.'"><img src="images/insert.gif" width="16px" height="16px"/></a></p>';
 					}
 					/*if($categories_stmt = mysqli_prepare($link, "SELECT id, name, max_points FROM `grade_categories` WHERE class = ?"))
 					{
@@ -289,21 +298,21 @@ if(login_check())
 				$category_query_id = $_GET['q'];
 				$link = connect_db_read();
 				
-				if($grades_stmt = mysqli_prepare($link, "SELECT points_earned, max_points, description FROM grades WHERE category = ?"))
+				if($grades_stmt = mysqli_prepare($link, "SELECT id, points_earned, max_points, description FROM grades WHERE category = ?"))
 				{
 					$k = 1;
 					mysqli_stmt_bind_param($grades_stmt, "i", $category_query_id);
 					mysqli_stmt_execute($grades_stmt);
 					mysqli_stmt_store_result($grades_stmt);
 					$results = mysqli_stmt_num_rows($grades_stmt);
-					mysqli_stmt_bind_result($grades_stmt, $points, $max_points, $description);
+					mysqli_stmt_bind_result($grades_stmt, $id, $points, $max_points, $description);
 					if($results >= 1){
 						echo '<h3>Number of assignments: '.$results.'</h3>';
 						echo '<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2).'</h3>';
 						echo '<h3>Points Offered: '.category_pts_offered($category_query_id).'</h3>';
 						while(mysqli_stmt_fetch($grades_stmt))
 						{
-							echo '		<p style="display:inline-block;line-height:5%;">Assignment '.$k++.': '.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <span class="edit-grade">edit</span><br>
+							echo '		<p style="display:inline-block;line-height:5%;">Assignment '.$k++.': '.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <a class="edit-grade" val="'.$points.';'.$max_points.';'.$description.';'.$id.'">edit</span><br>
 ';
 						}
 					}else
