@@ -125,7 +125,7 @@ function login_check() {
 function print_navbar_items() {
 	$loggedIn = login_check();
 	echo '<p class="'; echo $_SERVER['PHP_SELF'] == '/Ivy-League/dashboard.php' ? 'navcurrent' : 'navlink'; echo '"><a href="';echo ($loggedIn==True && $_SERVER['PHP_SELF'] != '/Ivy-League/logout.php') ? 'dashboard.php' : 'index.php'; echo '">Home</a></p>
-				<p class="navlink">About</p>';
+				<p class="navlink"><a href="about.html">About</a></p>';
 }
 
 function print_letter_grade($percentage) {

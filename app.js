@@ -12,14 +12,6 @@ var main = function() {
 		$('#editFormMax', window.parent.document).attr("value", attrsArray[1]);
 		$('#hiddenID', window.parent.document).attr("value", attrsArray[3]);
 	});
-	
-	/* Push the form up */
-	$('#hideBtn', window.parent.document).click(function() {
-		$('#scroll_form_edit_grade', window.parent.document).animate({
-			top: "-400px"
-		}, 400);
-		$('#lockoutImg', window.parent.document).toggle();
-	});
 };
 
 $(document).ready(main);
