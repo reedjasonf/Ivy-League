@@ -70,4 +70,58 @@ function print_summary_all_classes($uid) {
 	mysqli_close($link);
 }
 
+function print_percentage($cid) {
+	$link2 = connect_db_read();
+	$class_max_points = 0;
+	$total_points_earned = 0;
+	if($categories_stmt = mysqli_prepare($link2, "SELECT id, max_points, drop_after FROM `grade_categories` WHERE class = ?"))
+	{
+		mysqli_stmt_bind_param($categories_stmt, "i", $cid);
+		mysqli_stmt_execute($categories_stmt);
+		mysqli_stmt_bind_result($categories_stmt, $category_id, $category_max_pts, $category_drop_after);
+		while(mysqli_stmt_fetch($categories_stmt))
+		{
+			$class_max_points += $category_max_pts;
+			$link3 = connect_db_read();
+			// get the grade entries for the current category
+			if($category_drop_after != 0){
+				$grades_stmt = mysqli_prepare($link3, "SELECT id, points_earned, max_points FROM grades WHERE category = ? ORDER BY points_earned/max_points DESC LIMIT ?");
+				if($grades_stmt)
+					mysqli_stmt_bind_param($grades_stmt, "ii", $category_id, $category_drop_after);
+			}else{
+				$grades_stmt = mysqli_prepare($link3, "SELECT id, points_earned, max_points FROM grades WHERE category = ?");
+				if($grades_stmt)
+					mysqli_stmt_bind_param($grades_stmt, "i", $category_id);
+			}
+			if($grades_stmt)
+			{
+				$points = 0;
+				$cat_max = 0;
+				mysqli_stmt_execute($grades_stmt);
+				mysqli_stmt_store_result($grades_stmt);
+				if(mysqli_stmt_num_rows($grades_stmt) == 0)
+					$class_max_points = $class_max_points - $category_max_pts;
+				mysqli_stmt_bind_result($grades_stmt, $grade_id, $grade_pts, $grade_max);
+				while(mysqli_stmt_fetch($grades_stmt))
+				{
+					$points = $points + $grade_pts; // at the completion of this loop $points holds the value of grades in that category
+					$cat_max += $grade_max;
+				}
+				if($category_max_pts != 0 && $cat_max !=0)
+					$category_points = ($points/$cat_max)*$category_max_pts;
+				else
+					$category_points = 0;
+				//echo $category_points." ";
+				$total_points_earned += $category_points;
+			}else
+				echo 'There was a database error. Try again later.';
+			mysqli_close($link3);
+		}
+	}else
+		echo 'There was a database error. Try again later.';
+	$class_percent = $class_max_points == 0 ? -1 : $total_points_earned/$class_max_points;
+	mysqli_close($link2);
+	echo '<div class="singleclass"><div class="wrapper">'; echo $class_percent == -1 ? '<div class="class_points">No grades recorded</div>' : '<div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div>'; echo '<div class="class_letter_grade">'.print_letter_grade($class_percent)."</div></div></div>\n";
+}
+
 ?>

@@ -131,7 +131,8 @@ if(login_check())
 	<body id="loginError">
 		<div id="page_content">
 			<div id="banner">
-			<h1>Ivy-League STS</h1>
+			<h1>Ivy-League</h1>
+			<h3>Scholarship Tracking System</h3>
 			</div>
 			<div id="navbar">
 				<?php print_navbar_items(); ?>

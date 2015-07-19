@@ -1,5 +1,6 @@
 <?php
 include_once('common_functions.php');
+include_once('grade_functions.php');
 sec_session_start();
 if(COMPRESSION == TRUE){
 	ob_start("ob_gzhandler");
@@ -29,29 +30,37 @@ if(login_check())
 				}
 				
 				$categories = $_POST['category'];
+				$final_exam = false;
 				foreach($categories as &$category)
 				{
 					$category['name'] = test_input($category['name']);
+					if ($category['type'] = 'final exam' && $final_exam == false)
+						$final_exam = true;
+					else
+						$type_err = "There can only be one category of type 'final exam' per class";
 				}
 				unset($category);
 				
 				// Insert the data into the table.
-				
-				$link = connect_db_insert();
-				
-				$stmt1 = mysqli_prepare($link, "INSERT INTO `classes` (`name`, `instructor`, `student`) VALUES (?, ?, ?)") or die(mysqli_error($link));
-				mysqli_stmt_bind_param($stmt1, "ssi", $class_name, $instructor, $_SESSION['uid']);
-				mysqli_stmt_execute($stmt1) or die(mysqli_error($link));
-				
-				$class_id = mysqli_insert_id($link);
-				$stmt2 = mysqli_prepare($link, "INSERT INTO `grade_categories` (`name`, `class`, `max_points`) VALUES (?, ?, ?)");
-				foreach($categories as $category)
+				if(empty($type_err) || empty($instructor_err) || empty($class_name_err))
 				{
-					mysqli_stmt_bind_param($stmt2, "sii", $category['name'], $class_id, $category['points']);
-					mysqli_stmt_execute($stmt2) or die(mysqli_error($link));
+					
+					$link = connect_db_insert();
+					
+					$stmt1 = mysqli_prepare($link, "INSERT INTO `classes` (`name`, `instructor`, `student`) VALUES (?, ?, ?)") or die(mysqli_error($link));
+					mysqli_stmt_bind_param($stmt1, "ssi", $class_name, $instructor, $_SESSION['uid']);
+					mysqli_stmt_execute($stmt1) or die(mysqli_error($link));
+					
+					$class_id = mysqli_insert_id($link);
+					$stmt2 = mysqli_prepare($link, "INSERT INTO `grade_categories` (`name`, `class`, `type`, `max_points`) VALUES (?, ?, ?, ?)");
+					foreach($categories as $category)
+					{
+						mysqli_stmt_bind_param($stmt2, "sisi", $category['name'], $class_id, $category['type'], $category['points']);
+						mysqli_stmt_execute($stmt2) or die(mysqli_error($link));
+					}
+					mysqli_stmt_close($stmt1);
+					mysqli_stmt_close($stmt2);
 				}
-				mysqli_stmt_close($stmt1);
-				mysqli_stmt_close($stmt2);
 ?>
 	<head>
 		<meta charset="utf-8">
@@ -69,7 +78,7 @@ if(login_check())
 </html>
 <?php
 			}
-			if($_SERVER['REQUEST_METHOD'] != 'POST' || !empty($class_name_err) || !empty($instructor_err)){
+			if($_SERVER['REQUEST_METHOD'] != 'POST' || !empty($class_name_err) || !empty($instructor_err) || !empty($type_err)){
 			?>
 	<head>
 		<meta charset="utf-8">
@@ -107,10 +116,28 @@ if(login_check())
 				new_name_fld.id = "category_name_"+nextLine;
 				new_name_fld.name = "category["+nextLine+"][name]";
 				
+				var new_type_label = document.createElement("label");
+				new_type_label.htmlFor = "category_type_"+nextLine;
+				var label_text = document.createTextNode("Type: ");
+				new_type_label.appendChild(label_text);
+				
 				var new_pts_label = document.createElement("label");
-				new_pts_label.htmlFor = "category_name_"+nextLine;
+				new_pts_label.htmlFor = "category_points_"+nextLine;
 				var label_text = document.createTextNode("Points: ");
 				new_pts_label.appendChild(label_text);
+				
+				var new_type_fld = document.createElement("select");
+				new_type_fld.required = true;
+				new_type_fld.name = "category["+nextLine+"][type]";
+				var types = ['homework','quiz','exam','lab','in-class','assignment','project','other','final exam'];
+				for(var t in types)
+				{
+					var new_option = document.createElement("option");
+					new_option.value = types[t];
+					var optionText = document.createTextNode(types[t]);
+					new_option.appendChild(optionText);
+					new_type_fld.appendChild(new_option);
+				}
 				
 				var new_pts_fld = document.createElement("input");
 				new_pts_fld.type = "number";
@@ -127,6 +154,10 @@ if(login_check())
 				
 				new_line.appendChild(new_name_label);
 				new_line.appendChild(new_name_fld);
+				var space = document.createTextNode(" ");
+				new_line.appendChild(space);
+				new_line.appendChild(new_type_label);
+				new_line.appendChild(new_type_fld);
 				var space = document.createTextNode(" ");
 				new_line.appendChild(space);
 				new_line.appendChild(new_pts_label);
@@ -158,7 +189,7 @@ if(login_check())
 					each assignment.</p>
 					<p>You can create or delete categories later if you don't want to put them all in now.</p>
 					<div id="category_container">
-						<div class="category_line_wrapper" id="category_line_1"><label for="category_name_1">Category Name: </label><input type="text" id="category_name_1" name="category[1][name]"> <label for="category_points_1">Points: </label><input type="number" id="category_points_1" name="category[1][points]" min="1"> <a href="#" onclick="destroy_category(1);return false;">Remove</a></div>
+						<div class="category_line_wrapper" id="category_line_1"><label for="category_name_1">Category Name: </label><input type="text" id="category_name_1" name="category[1][name]"> <label for="category_type_1">Type: </label><select name="category[1][type]" required><option value="homework">homework</option><option value="quiz">quiz</option><option value="exam">exam</option><option value="lab">lab</option><option value="in-class">in-class</option><option value="assignment">assignment</option><option value="project">project</option><option value="other">other</option></select> <label for="category_points_1">Points: </label><input type="number" id="category_points_1" name="category[1][points]" min="1"> <a href="#" onclick="destroy_category(1);return false;">Remove</a></div>
 					</div>
 					<a href="#" onclick="add_category();return false;">Create Another Category</a>
 				</fieldset>
@@ -173,10 +204,20 @@ if(login_check())
 		case "details":
 			if($_SERVER['REQUEST_METHOD'] == 'POST')
 			{
-				$link = connect_db_update();
-				$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
-				mysqli_stmt_bind_param($stmt, "siii", $_POST["description"], $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
-				mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+				if(!empty($_POST['edit-submit']))
+				{
+					$link = connect_db_update();
+					$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
+					mysqli_stmt_bind_param($stmt, "siii", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
+					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+				}
+				if(!empty($_POST['add-submit']))
+				{
+					$link = connect_db_insert();
+					$stmt = mysqli_prepare($link, "INSERT INTO grades (category, description, points_earned, max_points) VALUES (?,?,?,?)") or die(mysqli_error($link));
+					mysqli_stmt_bind_param($stmt, "isii", $_POST["catID"], str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"]);
+					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+				}
 			}
 ?>
 	<head>
@@ -186,21 +227,37 @@ if(login_check())
 	</head>
 	<body id="class_details">
 	<img src="images/lockout.png" width="100%" height="100%" id="lockoutImg" style="position: absolute;left: 0px;top: 0px;z-index: 100;display: none;"/>
+	
 	<div id="scroll_form_edit_grade">
 		<form method="POST" action="">
-		<img id="hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;"/>
+		<img id="edit-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
 		<div class="centered">
 			<label for="description">Description: </label><input type="text" id="editFormDesc" name="description"/><br>
 			Points: <input type="number" id="editFormEarned" name="points" min="0" size="4" style="width:4em;"/> / <input type="number" id="editFormMax" name="max_points" min="0" size="4" style="width:4em;"/>
 			<br>
 			<br>
-			<input type="submit" value="Edit Grade"/><input type="hidden" name="hiddenID" id="hiddenID" value="" />
+			<input name="edit-submit" type="submit" value="Edit Grade"/><input type="hidden" name="hiddenID" id="hiddenID" value="" />
 		</div>
 		</form>
 	</div>
+	
+	<div id="scroll_form_add_assignment">
+		<form method="POST" action="">
+		<img id="add-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
+		<div class="centered">
+			<label for="description">Description: </label><input type="text" id="addFormDesc" name="description"/><br>
+			Points: <input type="number" id="addFormEarned" name="points" min="0" size="4" style="width:4em;"/> / <input type="number" id="addFormMax" name="max_points" min="0" size="4" style="width:4em;"/>
+			<br>
+			<br>
+			<input name="add-submit" type="submit" value="Add Assignment"/><input type="hidden" name="catID" id="catID" value="" />
+		</div>
+		</form>
+	</div>
+	
 		<div id="page_content">
 			<div id="banner">
-				<h1>Ivy-League STS</h1>
+				<h1>Ivy-League</h1>
+				<h3>Scholarship Tracking System</h3>
 			</div>
 			<div id="navbar">
 				<?php print_navbar_items(); ?>
@@ -231,6 +288,7 @@ if(login_check())
 ?>
 				<h2>Details for <?php echo $class_name; ?> </h2>
 				<h3>Instructor: <?php echo $class_instructor; ?></h3>
+				<h3><?php print_percentage(10); ?></h3>
 				<h3>Grades:</h3>
 				<div id="categories_section">
 <?php
@@ -238,40 +296,16 @@ if(login_check())
 					$class_categories = class_categories_names($class_query_id);
 					foreach($class_categories as $cat_id => $category)
 					{
-						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <a href="'.$cat_id.'"><img src="images/insert.gif" width="16px" height="16px"/></a></p>';
+						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <img src="images/insert.gif" width="16px" height="16px" class="insert-grade" catID="'.$cat_id.'" alt="Add assignment to this category"/></p>';
 					}
-					/*if($categories_stmt = mysqli_prepare($link, "SELECT id, name, max_points FROM `grade_categories` WHERE class = ?"))
-					{
-						mysqli_stmt_bind_param($categories_stmt, "i", $class_query_id);
-						mysqli_stmt_execute($categories_stmt);
-						mysqli_stmt_bind_result($categories_stmt, $category_id, $category_name, $category_max_pts);
-						$link2 = connect_db_read();
-						if($grade_stmt = mysqli_prepare($link2, "SELECT points_earned, max_points FROM `grades` WHERE category = ?"))
-						while(mysqli_stmt_fetch($categories_stmt))
-						{
-							echo '<p class="category">'.$category_name.'</p>';
-							mysqli_stmt_bind_param($grade_stmt, "i", $category_id);
-							mysqli_stmt_execute($grade_stmt);
-							mysqli_stmt_bind_result($grade_stmt, $points, $max_points);
-							$i = 1;
-							while(mysqli_stmt_fetch($grade_stmt))
-							{
-								echo '<p class="assignment_grade">Entry # '.$i++.': '.$points.'/'.$max_points.'</p>';
-							}
-						}
-						
-						foreach($categories as $category)
-						{
-						
-						}
-					}else
-						echo 'Fatal Database Error! Try again later.'.mysqli_error($link);*/
 ?>
 				</div>
-				<iframe id="category_details_window" name="category_details_window" style="min-height:30em;margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" >Your browser does not support frames</iframe>
+				<iframe id="category_details_window" name="category_details_window" style="margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" >Your browser does not support frames</iframe>
 				<br>
 				<br>
 				<a href="">Add Category</a>
+				<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+				<script src="add-assign.js"></script>
 <?php
 				}else{
 					echo 'Class details couldn\'t be found';
@@ -287,12 +321,23 @@ if(login_check())
 <?php
 		break; // end details case
 		case "category":
-			echo '	<head>
+?>
+	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Category Details</title>
+		<script>
+		function resizeIframe(iframeID)
+		{
+			var iframe = window.parent.document.getElementById(iframeID);
+			var container = document.getElementById('category_details_content');
+			iframe.style.height = (container.offsetHeight+20) + 'px';
+		}
+	</script>
 	</head>
-	<body>';
+	<body onload="resizeIframe('category_details_window')">
+		<div id="category_details_content">
+<?php
 			if(isset($_GET['q']))
 			{
 				$category_query_id = $_GET['q'];
@@ -307,12 +352,11 @@ if(login_check())
 					$results = mysqli_stmt_num_rows($grades_stmt);
 					mysqli_stmt_bind_result($grades_stmt, $id, $points, $max_points, $description);
 					if($results >= 1){
-						echo '<h3>Number of assignments: '.$results.'</h3>';
-						echo '<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2).'</h3>';
-						echo '<h3>Points Offered: '.category_pts_offered($category_query_id).'</h3>';
+						echo '		<h3>Number of assignments: '.$results.'</h3>';
+						echo '		<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).' / '.category_pts_offered($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2).'</h3>';
 						while(mysqli_stmt_fetch($grades_stmt))
 						{
-							echo '		<p style="display:inline-block;line-height:5%;">Assignment '.$k++.': '.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <a class="edit-grade" val="'.$points.';'.$max_points.';'.$description.';'.$id.'">edit</span><br>
+							echo '		<p style="display:inline-block;line-height:5%;">'.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <a class="edit-grade" val="'.$points.';'.$max_points.';'.$description.';'.$id.'">edit</a><br>
 ';
 						}
 					}else
@@ -320,8 +364,11 @@ if(login_check())
 				}
 			}else
 				echo 'No category id provided';
-echo '<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="app.js"></script>';
+?>
+	</div>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="app.js"></script>
+<?php
 		break; // end category details case
 	}
 }else{
