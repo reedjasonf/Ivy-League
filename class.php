@@ -85,6 +85,22 @@ if(login_check())
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Add a Class</title>
 		<script language="javascript" type="text/javascript">
+			function toggleSpecialOptions(lineNum)
+			{
+				var selectedOption = document.getElementById("category_special_"+lineNum).value;
+				var nFld = document.getElementById("category_n_"+lineNum);
+				var nFldLabel = document.getElementById("category_n_label_"+lineNum);
+				if(selectedOption == "dropAfterN" || selectedOption == "dropLowestN")
+				{
+					nFld.style.display = "inline";
+					nFldLabel.style.display = "inline";
+					nFld.required = true;
+				}else{
+					nFld.style.display = "none";
+					nFldLabel.style.display = "none";
+					nFld.removeAttribute("required")
+				}
+			}
 			function destroy_category(cat_id)
 			{
 				var container = document.getElementById('category_container');
@@ -129,6 +145,7 @@ if(login_check())
 				var new_type_fld = document.createElement("select");
 				new_type_fld.required = true;
 				new_type_fld.name = "category["+nextLine+"][type]";
+				new_type_fld.id = "category_type_"+nextLine;
 				var types = ['homework','quiz','exam','lab','in-class','assignment','project','other','final exam'];
 				for(var t in types)
 				{
@@ -144,6 +161,56 @@ if(login_check())
 				new_pts_fld.id = "category_points_"+nextLine;
 				new_pts_fld.min = "1";
 				new_pts_fld.name = "category["+nextLine+"][points]";
+				new_pts_fld.style.width = "5em";
+				
+				var new_special_label = document.createElement("label");
+				new_special_label.htmlFor = "category_special_"+nextLine;
+				var label_text = document.createTextNode("Special: ");
+				new_special_label.appendChild(label_text);
+				
+				var new_special_fld = document.createElement("select");
+				new_special_fld.name = "category["+nextLine+"][special]";
+				new_special_fld.id = "category_special_"+nextLine;
+				new_special_fld.addEventListener("change", function(){toggleSpecialOptions(""+nextLine);}, false);
+				
+				var new_n_label = document.createElement("label");
+				new_n_label.htmlFor = "category_n_"+nextLine;
+				new_n_label.id = "category_n_label_"+nextLine;
+				new_n_label.style.display="none";
+				var label_text = document.createTextNode("N: ");
+				new_n_label.appendChild(label_text);
+				
+				// create the options for the special select box (4)
+				var new_option = document.createElement("option");
+				new_option.value = "";
+				new_special_fld.appendChild(new_option);
+				
+				var new_option = document.createElement("option");
+					new_option.value = "dropAfterN";
+					var optionText = document.createTextNode("Drop After N Assignments");
+					new_option.appendChild(optionText);
+					new_special_fld.appendChild(new_option);
+					
+				var new_option = document.createElement("option");
+					new_option.value = "dropLowestN";
+					var optionText = document.createTextNode("Drop Lowest N Assignments");
+					new_option.appendChild(optionText);
+					new_special_fld.appendChild(new_option);
+					
+				var new_option = document.createElement("option");
+					new_option.value = "finalReplacesLowestExam";
+					var optionText = document.createTextNode("Final Exam Replaces Lowest Exam");
+					new_option.appendChild(optionText);
+					new_special_fld.appendChild(new_option);
+				
+				var new_n_fld = document.createElement("input");
+				new_n_fld.type = 'number';
+				new_n_fld.id = 'category_n_'+nextLine;
+				new_n_fld.min = "1";
+				new_n_fld.step = "1";
+				new_n_fld.name = "category["+nextLine+"][n]";
+				new_n_fld.style.display = "none";
+				
 				
 				var new_remove_link = document.createElement("a");
 				new_remove_link.href = "#";
@@ -164,6 +231,14 @@ if(login_check())
 				new_line.appendChild(new_pts_fld);
 				var space = document.createTextNode(" ");
 				new_line.appendChild(space);
+				new_line.appendChild(new_special_label);
+				new_line.appendChild(new_special_fld);
+				var space = document.createTextNode(" ");
+				new_line.appendChild(space);
+				new_line.appendChild(new_n_label);
+				new_line.appendChild(new_n_fld);
+				var space = document.createTextNode(" ");
+				new_line.appendChild(space);
 				new_line.appendChild(new_remove_link);
 				
 				container.appendChild(new_line);
@@ -172,7 +247,7 @@ if(login_check())
 	</head>
 	<body id="dashboard">
 		<div id="page_content">
-			<form id="add_class" style="margin-left:auto;margin-right:auto;width:60%;" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?o=add'; ?>" method="post">
+			<form id="add_class" style="margin-left:auto;margin-right:auto;width:80%;" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']).'?o=add'; ?>" method="post">
 				<fieldset>
 					<legend lang="en" dir="ltr">Class Information</legend>
 					Class Title* <input type="text" name="new_class_name" id="new_class_name" placeholder="(ex. 'Calculus I')" required><?php echo isset($class_name_err) ? $class_name_err : ""; ?><br>
@@ -189,7 +264,7 @@ if(login_check())
 					each assignment.</p>
 					<p>You can create or delete categories later if you don't want to put them all in now.</p>
 					<div id="category_container">
-						<div class="category_line_wrapper" id="category_line_1"><label for="category_name_1">Category Name: </label><input type="text" id="category_name_1" name="category[1][name]"> <label for="category_type_1">Type: </label><select name="category[1][type]" required><option value="homework">homework</option><option value="quiz">quiz</option><option value="exam">exam</option><option value="lab">lab</option><option value="in-class">in-class</option><option value="assignment">assignment</option><option value="project">project</option><option value="other">other</option></select> <label for="category_points_1">Points: </label><input type="number" id="category_points_1" name="category[1][points]" min="1"> <a href="#" onclick="destroy_category(1);return false;">Remove</a></div>
+						<div class="category_line_wrapper" id="category_line_1"><label for="category_name_1">Category Name: </label><input type="text" id="category_name_1" name="category[1][name]"> <label for="category_type_1">Type: </label><select name="category[1][type]" required><option value="homework">homework</option><option value="quiz">quiz</option><option value="exam">exam</option><option value="lab">lab</option><option value="in-class">in-class</option><option value="assignment">assignment</option><option value="project">project</option><option value="other">other</option></select> <label for="category_points_1">Points: </label><input type="number" id="category_points_1" name="category[1][points]" min="1" style="width: 5em"> <label for="category_special_1">Special: </label><select id="category_special_1" name="category[1][special]" onchange="toggleSpecialOptions(1)"><option value="" selected></option><option value="dropAfterN">Drop After N Assignments</option><option value="dropLowestN">Drop Lowest N Assignments</option><option value="finalReplacesLowestExam">Final Exam Replaces Lowest Exam</option></select> <label for="category_n_1" id="category_n_label_1" style="display: none;">N: </label> <input type="number" id="category_n_1" name="category[1][n]" min="1" step="1" style="display: none;" /> <a href="#" onclick="destroy_category(1);return false;">Remove</a></div>
 					</div>
 					<a href="#" onclick="add_category();return false;">Create Another Category</a>
 				</fieldset>
@@ -208,14 +283,14 @@ if(login_check())
 				{
 					$link = connect_db_update();
 					$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
-					mysqli_stmt_bind_param($stmt, "siii", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
+				mysqli_stmt_bind_param($stmt, "sddi", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
 					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
 				}
 				if(!empty($_POST['add-submit']))
 				{
 					$link = connect_db_insert();
 					$stmt = mysqli_prepare($link, "INSERT INTO grades (category, description, points_earned, max_points) VALUES (?,?,?,?)") or die(mysqli_error($link));
-					mysqli_stmt_bind_param($stmt, "isii", $_POST["catID"], str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"]);
+					mysqli_stmt_bind_param($stmt, "isdd", $_POST["catID"], str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"]);
 					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
 				}
 			}
@@ -233,7 +308,7 @@ if(login_check())
 		<img id="edit-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
 		<div class="centered">
 			<label for="description">Description: </label><input type="text" id="editFormDesc" name="description"/><br>
-			Points: <input type="number" id="editFormEarned" name="points" min="0" size="4" style="width:4em;"/> / <input type="number" id="editFormMax" name="max_points" min="0" size="4" style="width:4em;"/>
+			Points: <input type="number" id="editFormEarned" name="points" size="4" min="0" step="0.1" style="width:4em;"/> / <input type="number" id="editFormMax" name="max_points" min="0" step="0.1" size="4" style="width:4em;"/>
 			<br>
 			<br>
 			<input name="edit-submit" type="submit" value="Edit Grade"/><input type="hidden" name="hiddenID" id="hiddenID" value="" />
@@ -246,7 +321,7 @@ if(login_check())
 		<img id="add-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
 		<div class="centered">
 			<label for="description">Description: </label><input type="text" id="addFormDesc" name="description"/><br>
-			Points: <input type="number" id="addFormEarned" name="points" min="0" size="4" style="width:4em;"/> / <input type="number" id="addFormMax" name="max_points" min="0" size="4" style="width:4em;"/>
+			Points: <input type="number" id="addFormEarned" name="points" min="0" step="0.05" size="4" style="width:4em;"/> / <input type="number" id="addFormMax" name="max_points" min="0" step="0.05" size="4" style="width:4em;"/>
 			<br>
 			<br>
 			<input name="add-submit" type="submit" value="Add Assignment"/><input type="hidden" name="catID" id="catID" value="" />
@@ -288,7 +363,7 @@ if(login_check())
 ?>
 				<h2>Details for <?php echo $class_name; ?> </h2>
 				<h3>Instructor: <?php echo $class_instructor; ?></h3>
-				<h3><?php print_percentage(10); ?></h3>
+				<h3><?php print_percentage($class_query_id); ?></h3>
 				<h3>Grades:</h3>
 				<div id="categories_section">
 <?php
@@ -353,7 +428,7 @@ if(login_check())
 					mysqli_stmt_bind_result($grades_stmt, $id, $points, $max_points, $description);
 					if($results >= 1){
 						echo '		<h3>Number of assignments: '.$results.'</h3>';
-						echo '		<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).' / '.category_pts_offered($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2).'</h3>';
+						echo '		<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).' / '.category_pts_offered($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2)."</h3><br>\n";
 						while(mysqli_stmt_fetch($grades_stmt))
 						{
 							echo '		<p style="display:inline-block;line-height:5%;">'.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <a class="edit-grade" val="'.$points.';'.$max_points.';'.$description.';'.$id.'">edit</a><br>
