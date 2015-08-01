@@ -124,4 +124,101 @@ function print_percentage($cid) {
 	echo '<div class="singleclass"><div class="wrapper">'; echo $class_percent == -1 ? '<div class="class_points">No grades recorded</div>' : '<div class="class_points">'.number_format($total_points_earned, 2)."/".number_format($class_max_points).'</div>'; echo '<div class="class_letter_grade">'.print_letter_grade($class_percent)."</div></div></div>\n";
 }
 
+function getTeam($uid)
+{
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT team FROM `users` WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $uid);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $team);
+		mysqli_stmt_fetch($stmt);
+		mysqli_close($link);
+		return $team;
+	}else
+		return false;
+}
+
+function getTeamMembers($uid)
+{
+	$result = array(); // this is what we will return
+	$team = getTeam($uid);
+	// now that we have the team number query the team mates and add them to the array
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM `users` WHERE team = ? ORDER BY last_name ASC") or die(mysqli_error($link)))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $team);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $uid, $fName, $lName);
+		while(mysqli_stmt_fetch($stmt))
+		{
+			$result[] = array('fName'=>$fName, 'lName'=>$lName, 'uid'=>$uid);
+		}
+		mysqli_close($link);
+		return $result;
+	}else
+		return false;
+}
+
+function getCourses($uid)
+{
+	$result = array(); // this is what we will return
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT id, name, catelogNum FROM classes WHERE student = ? AND archived = 0") or die(mysqli_error($link)))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $uid);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $cid, $courseName, $courseCatNum);
+		while(mysqli_stmt_fetch($stmt))
+		{
+			$result[] = array('cid'=>$cid, 'courseName'=>$courseName, 'catNum'=>$courseCatNum);
+		}
+		mysqli_close($link);
+		return $result;
+	}else
+		return false;
+}
+
+function getCategories($cid)
+{
+	$result = array(); // this is what we will return
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT id, name, max_points, lowest_drop, drop_after, finalReplacesLowExam FROM grade_categories WHERE class = ?") or die(mysqli_error($link)))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $cid);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $catid, $catName, $catMaxPts, $lowestDrop, $dropAfter, $finalReplaces);
+		while(mysqli_stmt_fetch($stmt))
+		{
+			$result[] = array('catid'=>$catid, 'catName'=>$catName, 'catMaxPts'=>$catMaxPts, 'lowestDrop'=>$lowestDrop, 'dropAfter'=>$dropAfter, 'finalReplaces'=>$finalReplaces);
+		}
+		mysqli_close($link);
+		return $result;
+	}else
+		return false;
+}
+
+function getCatAssignments($catid, $orderByPercentage = false)
+{
+	$result = array(); // this is what we will return
+	$link = connect_db_read();
+	if($orderByPercentage)
+		$query = "SELECT description, points_earned, max_points FROM grades WHERE category = ? ORDER BY (points_earned/max_points) DESC";
+	else
+		$query = "SELECT description, points_earned, max_points FROM grades WHERE category = ?";
+	if($stmt = mysqli_prepare($link, $query) or die(mysqli_error($link)))
+	{
+		mysqli_stmt_bind_param($stmt, "i", $catid);
+		mysqli_stmt_execute($stmt);
+		mysqli_stmt_bind_result($stmt, $descr, $ptsEarned, $assignMaxPts);
+		while(mysqli_stmt_fetch($stmt))
+		{
+			$result[] = array('description'=>$descr, 'ptsEarned'=>$ptsEarned, 'assignMaxPts'=>$assignMaxPts);
+		}
+		mysqli_close($link);
+		return $result;
+	}else
+		return false;
+}
+
 ?>

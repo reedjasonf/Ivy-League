@@ -7,7 +7,7 @@
 /* general tags */
 html {
     font-size: 100%;
-	color: #125B53;
+	color: #FFFFFF;
 	font-family: Calibri;
 }
 
@@ -53,16 +53,22 @@ div#navbar {
 	background-color: #35A33C;
 }
 
-div#logout_block {
-	float: right;
+div#right_float_wrapper {
+		float: right;
+		display: inline-block;
+}
+
+div#admin_block, div#logout_block  {
 	font-size: 120%;
 	line-height: 120%;
 	font-weight: bold;
-	color: #125B53;
+	color: #FFFFFF;
+	display: inline;
+	margin-left: 1.5em;
 }
 
-div#logout_block a:visited{
-	color: #125B53;
+div#logout_block a:visited, div#admin_block a:visited{
+	color: #FFFFFF;
 }
 
 div#navbar p.navcurrent{
@@ -139,7 +145,7 @@ body#create_account_form label{
 
 div#container div.wrapper h1{
 	display: inline-block;
-	color: #125B53;
+	color: #FFFFFF;
 }
 
 body#class_details div#scroll_form_edit_grade{
@@ -260,11 +266,13 @@ body#dashboard div#point_summary div.pt_line_wrapper {
 
 body#dashboard div#point_summary div.pt_class_line {
 	display: inline-block;
+	color: #17731D;
 }
 
 body#dashboard div#point_summary div.class_rewards {
 	display: inline-block;
 	float: right;
+	color: #17731D;
 }
 
 body#dashboard div#point_summary div.pt_cat_line {
@@ -290,12 +298,14 @@ div.singleclass div.class_name {
 
 div.singleclass div.class_points {
 	display: inline-block;
+	color: #17731D;
 }
 
 div.singleclass div.class_letter_grade {
 	display: inline-block;
 	margin-left: 20px;
 	width: 30px;
+	color: #17731D;
 }
 
 div#class_summary div.singleclass div.wrapper {

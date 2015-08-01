@@ -340,8 +340,10 @@ if(login_check())
 			<div id="container" style="min-height:75%">
 				<div class="wrapper">
 					<h1>Class Details</h1>
-					<div id="logout_block">
-						<a href="logout.php">Logout</a>
+					<div id="right_float_wrapper">
+						<div id="logout_block">
+							<a href="logout.php">Logout</a>
+						</div>
 					</div>
 				</div>
 <?php
@@ -429,6 +431,7 @@ if(login_check())
 					if($results >= 1){
 						echo '		<h3>Number of assignments: '.$results.'</h3>';
 						echo '		<h3 style="display: inline-block;margin: 0px;">Points Awarded: '.category_pts_earned($category_query_id).' / '.category_pts_offered($category_query_id).'</h3><h3 style="display: inline-block;margin: 0px 20px 0px 20px;">Average: '.number_format(category_pts_earned($category_query_id)/$results, 2)."</h3><br>\n";
+						echo '		<h3 style="display: inline-block;margin: 0px;">Realtime Grade Earned for this category: '.number_format(category_pts_earned($category_query_id)/category_pts_offered($category_query_id)*category_max_points($category_query_id), 2).' / '.category_max_points($category_query_id)."</h3><br>\n";
 						while(mysqli_stmt_fetch($grades_stmt))
 						{
 							echo '		<p style="display:inline-block;line-height:5%;">'.$description.' .......... '.$points.' out of '.$max_points.' points.</p> <a class="edit-grade" val="'.$points.';'.$max_points.';'.$description.';'.$id.'">edit</a><br>

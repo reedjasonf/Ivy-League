@@ -80,11 +80,12 @@ function sec_session_start() {
 function login_check() {
 	$mysqli = connect_db_read();
     // Check if all session variables are set 
-    if (isset($_SESSION['uid'], $_SESSION['logged'], $_SESSION['username'], $_SESSION['login_string'])) {
+    if (isset($_SESSION['uid'], $_SESSION['logged'], $_SESSION['username'], $_SESSION['permissions'], $_SESSION['login_string'])) {
  
         $user_id = $_SESSION['uid'];
         $login_string = $_SESSION['login_string'];
         $username = $_SESSION['username'];
+		$permissions = $_SESSION['permissions'];
  
         // Get the user-agent string of the user.
         $user_browser = $_SERVER['HTTP_USER_AGENT'];
@@ -99,7 +100,7 @@ function login_check() {
                 // If the user exists get variables from result.
                 $stmt->bind_result($password);
                 $stmt->fetch();
-                $login_check = hash('sha512', $password . $user_browser);
+                $login_check = hash('sha512', $password . $permissions . $user_browser);
 				
                 if ($login_check == $login_string) {
                     // Logged In!!!! 
