@@ -312,15 +312,44 @@ function category_pts_earned($cat_id) {
 
 function category_pts_offered($cat_id) {
 	$link = connect_db_read();
-	if($stmt = mysqli_prepare($link, "SELECT SUM(max_points) FROM `grades` WHERE category = ?"))
+	
+	if($stmt = mysqli_prepare($link, "SELECT lowest_drop, drop_after FROM grade_categories WHERE id = ?"))
 	{
 		mysqli_stmt_bind_param($stmt, "i", $cat_id);
 		mysqli_stmt_execute($stmt);
-		mysqli_stmt_bind_result($stmt, $points_offered);
+		mysqli_stmt_bind_result($stmt, $dropLowest, $dropAfter);
 		mysqli_stmt_fetch($stmt);
-		$var = number_format($points_offered, 2);
+		mysqli_stmt_close($stmt);
+	}
+	if($result = mysqli_query($link, "SELECT id FROM grades WHERE category = ".$cat_id))
+	{
+		/* determine number of rows result set */
+		$row_cnt = mysqli_num_rows($result);
+		mysqli_free_result($result);
+	}
+	$limit = $dropLowest == 0 ? $dropAfter : $row_cnt-$dropLowest;
+	if($limit == 0)
+	{
+		if($stmt = mysqli_prepare($link, "SELECT SUM(max_points) FROM grades WHERE category = ?"))
+		{
+			mysqli_stmt_bind_param($stmt, "i", $cat_id);
+			mysqli_stmt_execute($stmt);
+			mysqli_stmt_bind_result($stmt, $points_offered);
+			mysqli_stmt_fetch($stmt);
+			mysqli_stmt_close($stmt);
+			$var = number_format($points_offered, 2);
+		}
 	}else
-		$var = False;
+		if($stmt = mysqli_prepare($link, "SELECT SUM(max_points) FROM (SELECT max_points FROM grades WHERE category = ? ORDER BY grades.points_earned/grades.max_points DESC LIMIT ?) as subtl"))
+		{
+			mysqli_stmt_bind_param($stmt, "ii", $cat_id, $limit);
+			mysqli_stmt_execute($stmt);
+			mysqli_stmt_bind_result($stmt, $points_offered);
+			mysqli_stmt_fetch($stmt);
+			mysqli_stmt_close($stmt);
+			$var = number_format($points_offered, 2);
+		}else
+			$var = False;
 	mysqli_close($link);
 	return $var;
 }

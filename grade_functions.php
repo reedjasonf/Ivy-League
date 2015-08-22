@@ -134,25 +134,34 @@ function getTeam($uid)
 		mysqli_stmt_bind_result($stmt, $team);
 		mysqli_stmt_fetch($stmt);
 		mysqli_close($link);
-		return $team;
+		// get more details about the team
+		$link = connect_db_read();
+		if($stmt2 = mysqli_prepare($link, "SELECT name, org FROM teams WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
+		{
+			mysqli_stmt_bind_param($stmt2, "i", $team);
+			mysqli_stmt_execute($stmt2);
+			mysqli_stmt_bind_result($stmt2, $tName, $tOrg);
+			mysqli_stmt_fetch($stmt2);
+			mysqli_close($link);
+		}
+		return array('teamID'=>$team, 'teamName'=>$tName, 'teamOrg'=>$tOrg);
 	}else
 		return false;
 }
 
-function getTeamMembers($uid)
+function getTeamMembers($tid)
 {
 	$result = array(); // this is what we will return
-	$team = getTeam($uid);
 	// now that we have the team number query the team mates and add them to the array
 	$link = connect_db_read();
 	if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM `users` WHERE team = ? ORDER BY last_name ASC") or die(mysqli_error($link)))
 	{
-		mysqli_stmt_bind_param($stmt, "i", $team);
+		mysqli_stmt_bind_param($stmt, "i", $tid);
 		mysqli_stmt_execute($stmt);
-		mysqli_stmt_bind_result($stmt, $uid, $fName, $lName);
+		mysqli_stmt_bind_result($stmt, $uid, $first_name, $last_name);
 		while(mysqli_stmt_fetch($stmt))
 		{
-			$result[] = array('fName'=>$fName, 'lName'=>$lName, 'uid'=>$uid);
+			$result[] = array('uid'=>$uid, 'first_name'=>$first_name, 'last_name'=>$last_name);
 		}
 		mysqli_close($link);
 		return $result;
@@ -203,20 +212,51 @@ function getCatAssignments($catid, $orderByPercentage = false)
 	$result = array(); // this is what we will return
 	$link = connect_db_read();
 	if($orderByPercentage)
-		$query = "SELECT description, points_earned, max_points FROM grades WHERE category = ? ORDER BY (points_earned/max_points) DESC";
+		$query = "SELECT id, description, points_earned, max_points FROM grades WHERE category = ? ORDER BY (points_earned/max_points) DESC";
 	else
-		$query = "SELECT description, points_earned, max_points FROM grades WHERE category = ?";
+		$query = "SELECT id, description, points_earned, max_points FROM grades WHERE category = ?";
 	if($stmt = mysqli_prepare($link, $query) or die(mysqli_error($link)))
 	{
 		mysqli_stmt_bind_param($stmt, "i", $catid);
 		mysqli_stmt_execute($stmt);
-		mysqli_stmt_bind_result($stmt, $descr, $ptsEarned, $assignMaxPts);
+		mysqli_stmt_bind_result($stmt, $id, $descr, $ptsEarned, $assignMaxPts);
 		while(mysqli_stmt_fetch($stmt))
 		{
-			$result[] = array('description'=>$descr, 'ptsEarned'=>$ptsEarned, 'assignMaxPts'=>$assignMaxPts);
+			$result[] = array('id'=>$id, 'description'=>$descr, 'ptsEarned'=>$ptsEarned, 'assignMaxPts'=>$assignMaxPts);
 		}
 		mysqli_close($link);
 		return $result;
+	}else
+		return false;
+}
+
+// PROPRIETARY function that seeks an array for the lowest percentage and removes that subarray
+// Returns an array containing the lowest grade max points and earned points
+function removeLowestGrade(&$a)
+{
+	if(is_array($a))
+	{
+		$lowest['value'] = reset($a)['assignMaxPts'] == 0 ? 0 : (current($a)['ptsEarned']/current($a)['assignMaxPts']);
+		$lowest['ptsEarned'] = reset($a)['ptsEarned'];
+		$lowest['assignMaxPts'] = reset($a)['assignMaxPts']; // so could be 0
+		$lowest['ind'] = key($a);
+		$index = key($a);
+		foreach($a as $i=>$grade)
+		{
+			$value = $a[$i]['assignMaxPts'] == 0 ? 0 : ($a[$i]['ptsEarned']/$a[$i]['assignMaxPts']);
+			if($value < $lowest['value'])
+			{
+				$lowest['value'] = $value;
+				$lowest['ptsEarned'] = $a[$i]['ptsEarned'];
+				$lowest['assignMaxPts'] = $a[$i]['assignMaxPts'];
+				$index = $i;
+				//echo $index.'<br';
+				$lowest['ind'] = $i;
+			}
+		}
+		//echo $index.' is being unset.<br>';
+		unset($a[$index]);
+		return $lowest;
 	}else
 		return false;
 }
