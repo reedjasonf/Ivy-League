@@ -96,3 +96,4 @@ Direct visit to /Ivy-League/dashboard.php from IP ::1. [2015-07-24 22:15:22:9775
 Direct visit to /Ivy-League/dashboard.php from IP ::1. [2015-07-30 02:30:06:677469]
 Invalid permissions for /Ivy-League/admin_panel.php from IP ::1. Logged in with UID:8. [2015-07-30 21:38:23:283735]
 Invalid permissions for /Ivy-League/admin_panel.php from IP ::1. Logged in with UID:9. [2015-07-31 17:22:00:316919]
+Direct visit to /Ivy-League/admin_panel.php from IP ::1. [2015-09-05 23:45:40:26400]
