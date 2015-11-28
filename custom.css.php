@@ -210,7 +210,7 @@ body#class_details div#scroll_form_edit_grade{
 
 body#class_details div#scroll_form_add_assignment{
 	top: -165px; /* start off the screen */
-	width: 26%;
+	width: 24%;
 	position: fixed;
 	z-index: 102;
 	margin: 0 0 0 -10%;
