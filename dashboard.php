@@ -16,6 +16,7 @@ if(login_check())
 ?>
 	<head>
 		<meta charset="urf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Your Ivy-League Dashboard</title>
 		<script language="javascript" type="text/javascript">
@@ -134,6 +135,7 @@ if(login_check())
 ?>
 	<head>
 		<meta charset="urf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Error: Not Logged In</title>
 	</head>

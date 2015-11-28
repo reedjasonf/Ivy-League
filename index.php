@@ -61,6 +61,7 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 ?>
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Scholastic Tracking and Reward System</title>
 		<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>

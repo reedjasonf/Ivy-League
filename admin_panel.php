@@ -54,9 +54,60 @@ if(login_check())
 		// 16s bit (2^4) set: can assign team members
 		// 32s bit (2^5) set: can see any member of the org/league's points
 		// 64s bit (2^6) set: can see any member of the org/league's grades
-		// 128s bit (2^7) set: can scramble/reset a user's password
+		// 128s bit (2^7) set: can select team leaders and assign teams
+		// 256s bit (2^7) set: can scramble/reset a user's password
 		switch(@$_GET['func'])
 		{
+			case "teamLeaders":
+				if(($_SESSION['permissions'] & 8) == true)
+				{
+					echo '	<head>
+		<meta charset="urf-8">
+		<link rel="stylesheet" type="text/css" href="custom.css.php">
+		<title>Admin Controls - Create Teams</title>
+	</head>
+	<body>
+		<div id="page_content">
+			<div id="banner">
+				<h1>Ivy-League</h1>
+				<h3>Scholarship Tracking System</h3>
+			</div>
+			<div id="navbar">'."\n";
+				print_navbar_items();
+					echo "\n".'			</div>
+			<div id="container">
+				<form method="POST" action="" style="margin: 0 auto; width: 60%">
+					<h3>Select members of you team to be team leaders.</h3>
+					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
+					<select size="20" multiple style="display: inline-block;">'."\n";
+					$teamInfo = getTeam($_SESSION['uid']);
+					$link = connect_db_read();
+					if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM users WHERE org = ? AND permissions = 0"))
+					{
+						mysqli_stmt_bind_param($stmt, "i", $teamInfo['teamOrg']);
+						mysqli_stmt_execute($stmt);
+						mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName);
+						while(mysqli_stmt_fetch($stmt))
+						{
+							echo '						<option value="'.$uid.'">'.$uLastName.', '.$uFirstName.'</option>'."\n";
+						}
+						mysqli_stmt_close($stmt);
+					}
+					echo '					</select>
+					<table border="0" style="display: inline-block; vertical-align: 125px;">
+						<tr><td><button type="button" style="padding: 15px;">&gt;</button></td></tr>
+						<tr><td><button type="button" style="padding: 15px;">&lt;</button></td></tr>
+					</table>
+					<select size="20" multiple style="display: inline-block;">
+
+					</select>
+				</form>
+			</div>
+		</div>'."\n";
+				}else
+					echo '<h2>Permission Error: You do not have permission to view this page.</h2>';
+			break;
+			
 			case "report":
 				echo '	<head>
 		<meta charset="urf-8">'."\n";
@@ -196,8 +247,119 @@ if(login_check())
 						// if they have team priveledges make sure the requested UID is on their team
 						}elseif(($_SESSION['permissions'] & 2) == true || ($_SESSION['permissions'] & 4) == true)
 						{
-							
-
+							$teamInfo = getTeam($_SESSION['uid']);
+							$team = array();
+							$teamMembers = getTeamMembers($teamInfo['teamID']); // gets UID, first name, and last name of each member of the team
+							if(in_array_r($_GET['member'], $teamMembers)) // they are members of the same team
+							{
+								$member = new user($_GET['member']); // a new user object is created and populated with courses, categories and assignments
+								
+								echo '		<title>Ivy League: Member Report</title>
+		<style>
+			.transparent40 {
+				opacity: 0.4;
+				filter: Alpha(opacity=40); /* IE8 and earlier */
+			}
+			
+			table, td, th {
+				border: 1px solid black;
+				margin-left: auto;
+				margin-right: auto;
+				border-collapse: collapse;
+			}
+		</style>
+	</head>
+	<body>
+		<table>
+			<tr>
+				<td colspan="2">Team Name:</td>
+				<td colspan="3">'.$teamInfo['teamName'].'</td>
+				<td colspan="2">&nbsp;</td>
+				<td>Date: </td>
+				<td>'.date('n/j/Y').'</td>
+			</tr>
+			<tr>
+				<td colspan="2">League for:</td>
+				<td colspan="3">Organization Name Goes Here</td>
+				<td colspan="2">&nbsp;</td>
+				<td>Time: </td>
+				<td>'.date('g:i:s A').'</td>
+			</tr>
+			<tr>
+				<td colspan="9">&nbsp;</td>
+			</tr>';
+								echo '			<tr>
+				<td colspan="3">'.$member->fname.' '.$member->lname.'</td>
+				<td colspan="6">'.count($member->courses).' Course'; echo count($member->courses) != 1 ? 's' : ''; echo '</td>
+			</tr>'."\n";
+								foreach($member->courses as $course)
+								{
+									echo '			<tr>
+				<td style="border-bottom:0;">&nbsp;</td>
+				<td colspan="4">'.$course->title.' - '.$course->cn.' ('.$course->credits.' credits)</td>
+				<td>'.number_format($course->earnedPoints, 1).'</td>
+				<td style="padding: 0 4px;"> / </td>
+				<td>'.number_format($course->totalPoints-$course->inactivePoints).'</td>
+				<td>'.number_format($course->currentGrade*100, 2).'%</td>
+			</tr>'."\n";
+									foreach($course->categories as $category)
+									{
+										echo '			<tr>
+				<td style="border-top:0;border-right:0;border-bottom:0;">&nbsp;</td>
+				<td style="border-left:0;border-bottom:0;border-top:0;">&nbsp;</td>
+				<td>'.$category->title.'</td>
+				<td colspan="2">'.count($category->assignments).' assignment'; echo count($category->assignments) != 1? 's' : ''; echo '</td>
+				<td>'; echo $category->totalOffered == 0 ? '&nbsp;' : number_format($category->catPoints(), 1); echo '</td>
+				<td>/</td>
+				<td>'.$category->maxPoints.'</td>
+				<td>'; echo $category->catPoints() > 0 ? number_format($category->catPoints()/$category->maxPoints*100, 1):0; echo'%</td>
+			</tr>'."\n";
+										foreach($category->assignments as $index=>$assignment)
+										{
+											
+											echo '			<tr'; echo @(($assignment->earned/$assignment->denom) <=0.7 && $assignment->denom > 0) ? ' style="border-color:black;color:red;font-weight:bold;"': ''; echo '>';
+											echo "\n".'				<td colspan="3" style="border-top:0;border-bottom:0;">&nbsp;</td>
+				<td';
+											if($assignment->dropped)
+												echo $assignment->dropped ? ' class="transparent40"><s>':'>';
+											else echo '>';
+											echo ($index++);
+											if($assignment->dropped)
+												echo '</s>';
+											echo '. </td>
+				<td';
+											if($assignment->dropped)
+												echo $assignment->dropped ? ' class="transparent40"><s>':'>';
+											else echo '>';
+											echo $assignment->description;
+											if($assignment->dropped)
+												echo '</s>';
+											echo '</td>
+				<td';
+											if($assignment->dropped)
+												echo $assignment->dropped ? ' class="transparent40"><s>':'>';
+											else echo '>';
+											echo $assignment->earned;
+											if($assignment->dropped)
+												echo '</s>';
+											echo '</td>
+				<td>/</td>
+				<td';
+											if($assignment->dropped)
+												echo $assignment->dropped ? ' class="transparent40"><s>':'>';
+											else echo '>';
+											echo $assignment->denom;
+											if($assignment->dropped)
+												echo '</s>';
+											echo '</td>
+				<td>&nbsp;</td>
+			</tr>'."\n";
+										}
+									}
+								}
+							}else{ // they are not members of the same team and an error should be displayed
+								echo '<h2>Permission Error: You do not have permission to view this member because they are not on your team.</h2>';
+							}
 						}
 
 					break; // end ind report case
@@ -359,13 +521,13 @@ if(login_check())
 				<h3>Available Commands:</h3>
 				<br>
 				<h3><u>Tools:</u></h3>
-					<ul>
+				<ul>
 <?php
 				if(($_SESSION['permissions'] & 2) == true || ($_SESSION['permissions'] & 4) == true || ($_SESSION['permissions'] & 32) == true || ($_SESSION['permissions'] & 64) == true)
 				{
 					if(($_SESSION['permissions'] & 2) == true || ($_SESSION['permissions'] & 4) == true)
-						echo '						<li><a href="admin_panel.php?func=report&type=team" target="_blank">View/Print Team Report</a></li>'."\n";
-						echo '						<li>View/Print Individual Report: <form style="display:inline-block;" method="GET" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'"" id="memberReportSelect">
+						echo '					<li><a href="admin_panel.php?func=report&type=team" target="_blank">View/Print Team Report</a></li>'."\n";
+						echo '					<li>View/Print Individual Report: <form style="display:inline-block;" method="GET" action="'.htmlspecialchars($_SERVER['PHP_SELF']).'"" id="memberReportSelect">
 							<input type="hidden" name="func" value="report" />
 							<input type="hidden" name="type" value="ind" />
 							<select onchange="this.form.submit()" name="member">
@@ -393,7 +555,23 @@ if(login_check())
 ?>
 				
 						
-					</ul>
+				</ul>
+					<h3><u>Team Options</u></h3>
+<?PHP				if(($_SESSION['permissions'] & 128) == true)
+					{
+						echo '				<ol>
+					<li><a href="admin_panel.php?func=teamLeaders">Select Team Leaders</a></li>
+					<li><a href="admin_panel.php?func=teams">Assign Teams</a></li>
+				</ol>';
+					}
+					if(($_SESSION['permissions'] & 1) == true)
+					{
+						echo '				<ul>
+					<li>Edit Team Name (One Time Only)</li>
+				</ul>';
+					}
+?>
+					
 			</div>
 		</div>
 <?php
