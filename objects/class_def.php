@@ -91,7 +91,7 @@ class course
 			//echo $cat->catPoints().'<br>';
 			
 		}
-		$this->currentGrade = (float)($this->earnedPoints/($this->totalPoints-$this->inactivePoints));
+		$this->currentGrade = ($this->totalPoints-$this->inactivePoints) >0 ? (float)($this->earnedPoints/($this->totalPoints-$this->inactivePoints)) : 0;
 		//echo ($coursePoints).'<br>';
 	}
 }

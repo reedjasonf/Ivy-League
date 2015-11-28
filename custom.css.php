@@ -216,7 +216,7 @@ body#dashboard div#class_summary{
     -moz-box-shadow: 10px 10px 2px #000 inset;
     -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 38%;
+	width: 42%;
 	display: inline-block;
 	vertical-align: top;
 	margin-left: 4%;
@@ -249,7 +249,7 @@ body#dashboard div#point_summary{
     -moz-box-shadow: 10px 10px 2px #fff inset;
     -webkit-box-shadow: 1px 1px 2px #fff inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 38%;
+	width: 42%;
 	display: inline-block;
 	vertical-align: top;
 	margin-right: 4%;
