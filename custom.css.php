@@ -210,13 +210,12 @@ body#class_details div#scroll_form_edit_grade{
 
 body#class_details div#scroll_form_add_assignment{
 	top: -165px; /* start off the screen */
-	width: 20%;
+	width: 26%;
 	position: fixed;
 	z-index: 102;
 	margin: 0 0 0 -10%;
 	left: 50%;
-	height: 160px;
-	display: box;
+	display: block;
 	background-color: #465150;
 	color: white;
 	border: #aaa solid 2px;
@@ -259,10 +258,10 @@ body#dashboard div#class_summary{
     -moz-box-shadow: 10px 10px 2px #000 inset;
     -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 42%;
+	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-left: 4%;
+	margin-left: 3%;
 }
 
 body#dashboard div#class_summary h2{
@@ -292,10 +291,10 @@ body#dashboard div#point_summary{
     -moz-box-shadow: 10px 10px 2px #fff inset;
     -webkit-box-shadow: 1px 1px 2px #fff inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 42%;
+	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-right: 4%;
+	margin-right: 3%;
 	float: right;
 }
 
@@ -333,6 +332,8 @@ body#dashboard div#point_summary div.pt_cat_line div.pt_cat {
 
 div.singleclass{
 	font-size: 130%;
+	display: inline-block;
+	width: 100%;
 }
 
 div.singleclass div.class_name {
@@ -340,7 +341,7 @@ div.singleclass div.class_name {
 }
 
 div.singleclass div.class_points {
-	display: inline-block;
+	display: inline;
 	color: #17731D;
 }
 
@@ -352,7 +353,9 @@ div.singleclass div.class_letter_grade {
 }
 
 div#class_summary div.singleclass div.wrapper {
-	display: inline-block;
+	display: inline;
+	margin-left: auto;
+	margin-right: 0px;
 	float: right;
 }
 

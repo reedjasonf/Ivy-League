@@ -91,11 +91,8 @@ class course
 			//echo $cat->catPoints().'<br>';
 			
 		}
-<<<<<<< HEAD
 		$this->currentGrade = ($this->totalPoints-$this->inactivePoints) >0 ? (float)($this->earnedPoints/($this->totalPoints-$this->inactivePoints)) : 0;
-=======
 		$this->currentGrade = ($this->totalPoints-$this->inactivePoints) > 0 ? (float)($this->earnedPoints/($this->totalPoints-$this->inactivePoints)) : 0;
->>>>>>> origin/Users-Adding-Categories
 		//echo ($coursePoints).'<br>';
 	}
 }

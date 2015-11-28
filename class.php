@@ -320,6 +320,7 @@ if(login_check())
 		<form method="POST" action="">
 		<img id="add-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
 		<div class="centered">
+			<div id="cat_label" style="font-size: 120%;"></div>
 			<label for="description">Description: </label><input type="text" id="addFormDesc" name="description"/><br>
 			Points: <input type="number" id="addFormEarned" name="points" min="0" step="0.05" size="4" style="width:4em;"/> / <input type="number" id="addFormMax" name="max_points" min="0" step="0.05" size="4" style="width:4em;"/>
 			<br>
@@ -373,7 +374,7 @@ if(login_check())
 					$class_categories = class_categories_names($class_query_id);
 					foreach($class_categories as $cat_id => $category)
 					{
-						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <img src="images/insert.gif" width="16px" height="16px" class="insert-grade" catID="'.$cat_id.'" alt="Add assignment to this category"/></p>';
+						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <img src="images/insert.gif" width="16px" height="16px" class="insert-grade" catID="'.$cat_id.'" catName="'.$category.'" alt="Add assignment to this category"/></p>';
 					}
 ?>
 				</div>

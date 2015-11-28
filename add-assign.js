@@ -6,6 +6,7 @@ var main = function() {
 		}, 400);
 		$('#lockoutImg', window.parent.document).toggle();
 		$('#catID').attr("value", this.getAttribute("catid"));
+		$('#cat_label').html("Add assignment to "+this.getAttribute("catName"));
 	});
 	
 	/* Push the form up */
