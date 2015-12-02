@@ -65,6 +65,27 @@ if(login_check())
 		<meta charset="urf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Admin Controls - Create Teams</title>
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script>
+			$(document).ready(function(){
+				$("#teamLeaderList").width($("#regMemberList").width());
+				$("#regMemberList").width($("#teamLeaderList").width());
+				
+				$("#leftToRight").click(function(){
+					var selectedLeft = $("#regMemberList option:selected").each(function(index){
+						$("#teamLeaderList").append(this);
+					});
+				});
+					
+				$("#rightToLeft").click(function(){
+					var selectedRight = $("#teamLeaderList option:selected").each(function(index){
+						$("#regMemberList").append(this);
+					});
+					
+				});
+			});
+</script>
 	</head>
 	<body>
 		<div id="page_content">
@@ -79,7 +100,7 @@ if(login_check())
 				<form method="POST" action="" style="margin: 0 auto; width: 60%">
 					<h3>Select members of you team to be team leaders.</h3>
 					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
-					<select size="20" multiple style="display: inline-block;">'."\n";
+					<select id="regMemberList" size="20" multiple style="display: inline-block;">'."\n";
 					$teamInfo = getTeam($_SESSION['uid']);
 					$link = connect_db_read();
 					if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM users WHERE org = ? AND permissions = 0"))
@@ -95,10 +116,10 @@ if(login_check())
 					}
 					echo '					</select>
 					<table border="0" style="display: inline-block; vertical-align: 125px;">
-						<tr><td><button type="button" style="padding: 15px;">&gt;</button></td></tr>
-						<tr><td><button type="button" style="padding: 15px;">&lt;</button></td></tr>
+						<tr><td><button id="leftToRight" type="button" style="padding: 15px;">-&gt;</button></td></tr>
+						<tr><td><button id="rightToLeft" type="button" style="padding: 15px;">&lt;-</button></td></tr>
 					</table>
-					<select size="20" multiple style="display: inline-block;">
+					<select id="teamLeaderList" size="20" multiple style="display: inline-block;">
 
 					</select>
 				</form>
