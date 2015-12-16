@@ -28,6 +28,15 @@ function connect_db_update(){
 		return $link;
 }
 
+function connect_db_delete(){
+	$link = mysqli_connect(HOST,DELETE_USER,DELETE_PASSWORD,DATABASE) or die("Error " . mysqli_error($link));
+	if(mysqli_connect_errno()) {
+		printf("Connect to database failed: %s\n", mysqli_connect_error());
+		return false;
+	}else
+		return $link;
+}
+
 function m_empty()
 {
     foreach(func_get_args() as $arg)

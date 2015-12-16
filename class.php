@@ -283,7 +283,7 @@ if(login_check())
 				{
 					$link = connect_db_update();
 					$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
-				mysqli_stmt_bind_param($stmt, "sddi", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
+					mysqli_stmt_bind_param($stmt, "sddi", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
 					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
 				}
 				if(!empty($_POST['add-submit']))
