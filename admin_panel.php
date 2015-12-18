@@ -65,6 +65,25 @@ if(login_check())
 		<meta charset="urf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Admin Controls - Create Teams</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script>
+			$(document).ready(function(){
+				document.getElementById("leader_members").style.minWidth = $("#regular_members").width()+"px";
+				document.getElementById("regular_members").style.minWidth = $("#regular_members").width()+"px";
+				
+				$("#move_right").click(function(){
+					$("#regular_members option:selected").each(function(){
+						$("#leader_members").append(this);
+					});
+				});
+					
+				$("#move_left").click(function(){
+					$("#leader_members option:selected").each(function(){
+						$("#regular_members").append(this);
+					});
+				});
+			});
+		</script>
 	</head>
 	<body>
 		<div id="page_content">
@@ -77,9 +96,17 @@ if(login_check())
 					echo "\n".'			</div>
 			<div id="container">
 				<form method="POST" action="" style="margin: 0 auto; width: 60%">
-					<h3>Select members of you team to be team leaders.</h3>
+					<h3>Select members of your team to be team leaders.</h3>
 					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
-					<select size="20" multiple style="display: inline-block;">'."\n";
+					<br>
+					<table border="0">
+						<tr>
+							<td><h3>Members</h3></td>
+							<td></td>
+							<td><h3>Team Leaders</h3></td>
+						</tr><tr>
+							<td>
+								<select size="20" multiple style="display: inline-block;" id="regular_members">'."\n";
 					$teamInfo = getTeam($_SESSION['uid']);
 					$link = connect_db_read();
 					if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM users WHERE org = ? AND permissions = 0"))
@@ -93,14 +120,20 @@ if(login_check())
 						}
 						mysqli_stmt_close($stmt);
 					}
-					echo '					</select>
-					<table border="0" style="display: inline-block; vertical-align: 125px;">
-						<tr><td><button type="button" style="padding: 15px;">&gt;</button></td></tr>
-						<tr><td><button type="button" style="padding: 15px;">&lt;</button></td></tr>
+					echo '								</select>
+							</td>
+							<td>
+								<table border="0" style="display: inline-block; vertical-align: middle;">
+									<tr><td><button type="button" style="padding: 15px;" id="move_right">&gt;</button></td></tr>
+									<tr><td><button type="button" style="padding: 15px;" id="move_left">&lt;</button></td></tr>
+								</table>
+							</td>
+							<td>
+								<select size="20" multiple style="display: inline-block;" id="leader_members">
+								</select>
+							</td>
+						</tr>
 					</table>
-					<select size="20" multiple style="display: inline-block;">
-
-					</select>
 				</form>
 			</div>
 		</div>'."\n";
