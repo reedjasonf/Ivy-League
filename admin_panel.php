@@ -12,7 +12,7 @@ if(COMPRESSION == TRUE){
 <?php
 if(login_check())
 {
-	// logged in correctly	d
+	// logged in correctly
 	// display the admin page
 	// first check if the user should be looking at the page
 	// (ie do they have any special permissions?)
@@ -133,7 +133,6 @@ if(login_check())
 		<meta charset="urf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Admin Controls - Create Teams</title>
-<<<<<<< HEAD
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script>
 			$(document).ready(function(){
@@ -153,29 +152,6 @@ if(login_check())
 				});
 			});
 		</script>
-=======
-		
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-		<script>
-			$(document).ready(function(){
-				$("#teamLeaderList").width($("#regMemberList").width());
-				$("#regMemberList").width($("#teamLeaderList").width());
-				
-				$("#leftToRight").click(function(){
-					var selectedLeft = $("#regMemberList option:selected").each(function(index){
-						$("#teamLeaderList").append(this);
-					});
-				});
-					
-				$("#rightToLeft").click(function(){
-					var selectedRight = $("#teamLeaderList option:selected").each(function(index){
-						$("#regMemberList").append(this);
-					});
-					
-				});
-			});
-</script>
->>>>>>> origin/Users-Adding-Categories
 	</head>
 	<body>
 		<div id="page_content">
@@ -190,7 +166,6 @@ if(login_check())
 				<form method="POST" action="" style="margin: 0 auto; width: 60%">
 					<h3>Select members of your team to be team leaders.</h3>
 					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
-<<<<<<< HEAD
 					<br>
 					<table border="0">
 						<tr>
@@ -208,12 +183,6 @@ if(login_check())
 						mysqli_stmt_execute($stmt);
 						mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName);
 						while(mysqli_stmt_fetch($stmt))
-=======
-					<select id="regMemberList" name="regMemberList" size="20" multiple style="display: inline-block;">'."\n";
-						$teamInfo = getTeam($_SESSION['uid']);
-						$link = connect_db_read();
-						if($stmt = mysqli_prepare($link, "SELECT users.id, users.first_name, users.last_name, teams.name, teams.id FROM users LEFT JOIN teams ON users.id=teams.leader WHERE users.org = ? and users.id <> ?"))
->>>>>>> origin/Users-Adding-Categories
 						{
 							mysqli_stmt_bind_param($stmt, "ii", $teamInfo['teamOrg'], $_SESSION['uid']);
 							mysqli_stmt_execute($stmt);
@@ -229,7 +198,6 @@ if(login_check())
 							}
 							mysqli_stmt_close($stmt);
 						}
-<<<<<<< HEAD
 						mysqli_stmt_close($stmt);
 					}
 					echo '								</select>
@@ -246,21 +214,9 @@ if(login_check())
 							</td>
 						</tr>
 					</table>
-=======
-						echo '					</select>'.$teamInfo['teamOrg'].'
-					<table border="0" style="display: inline-block; vertical-align: 125px;">
-						<tr><td><button id="leftToRight" type="button" style="padding: 15px;">-&gt;</button></td></tr>
-						<tr><td><button id="rightToLeft" type="button" style="padding: 15px;">&lt;-</button></td></tr>
-					</table>
-					<select id="teamLeaderList" name="teamLeaderList" size="20" multiple style="display: inline-block;">'.'\n';
-						foreach($leaders as $row)
-						{
-							echo '						<option value="'.$row['uid'].'">'.$row['uLastName'].', '.$row['uFirstName'].'</option>'."\n";
-						}
-						echo '					</select>
+
 					<p> !!! WARNING !!!: Submitting this form will delete all teams and reassign team leaders. All current team information will be lost.</p>
 					<input type="submit" value="Create Teams" onclick="return confirm(\'Submitting this form will delete all current team information. Do you wish to continue? (Press OK to continue or Cancel to abort)\')"/>
->>>>>>> origin/Users-Adding-Categories
 				</form>
 			</div>
 		</div>'."\n";
