@@ -12,7 +12,7 @@ if(COMPRESSION == TRUE){
 <?php
 if(login_check())
 {
-	// logged in correctly	
+	// logged in correctly	d
 	// display the admin page
 	// first check if the user should be looking at the page
 	// (ie do they have any special permissions?)
