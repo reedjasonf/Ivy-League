@@ -127,20 +127,20 @@ function print_percentage($cid) {
 function getTeam($uid)
 {
 	$link = connect_db_read();
-	if($stmt = mysqli_prepare($link, "SELECT team FROM `users` WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
+	if($stmt = mysqli_prepare($link, "SELECT team, org FROM `users` WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
 	{
 		mysqli_stmt_bind_param($stmt, "i", $uid);
 		mysqli_stmt_execute($stmt);
-		mysqli_stmt_bind_result($stmt, $team);
+		mysqli_stmt_bind_result($stmt, $team, $tOrg);
 		mysqli_stmt_fetch($stmt);
 		mysqli_close($link);
 		// get more details about the team
 		$link = connect_db_read();
-		if($stmt2 = mysqli_prepare($link, "SELECT name, org FROM teams WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
+		if($stmt2 = mysqli_prepare($link, "SELECT name FROM teams WHERE id = ? LIMIT 1") or die(mysqli_error($link)))
 		{
 			mysqli_stmt_bind_param($stmt2, "i", $team);
 			mysqli_stmt_execute($stmt2);
-			mysqli_stmt_bind_result($stmt2, $tName, $tOrg);
+			mysqli_stmt_bind_result($stmt2, $tName);
 			mysqli_stmt_fetch($stmt2);
 			mysqli_close($link);
 		}

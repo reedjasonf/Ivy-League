@@ -61,10 +61,79 @@ if(login_check())
 			case "teamLeaders":
 				if(($_SESSION['permissions'] & 8) == true)
 				{
-					echo '	<head>
+					if($_SERVER['REQUEST_METHOD'] == 'POST')
+					{
+						// when the form is submitted the following will be done
+						// 1. Teams will be deleted by ID (optional as long as every team member's team is set to NULL in step 2)
+						//    Deleting the team numbers will make the table smaller, however.
+						// 2. Everyone in the org will have their team number set to NULL
+						// 3. Everyone in the org will have their permissions set to 0
+						// For the people selected as leaders only:
+						// 5. Teams will be created with new ID numbers and with the leader's name.
+						// 6. Team leaders will have their team association set to their own team.
+						// 7. Leaders will also receive elevated permissions
+						
+						$teamInfo = getTeam($_SESSION['uid']);
+						
+						// Step 1. Remove old teams from table
+						$link = connect_db_delete();
+						if($stmt = mysqli_prepare($link, "DELETE FROM teams WHERE teams.org = ?"))
+						{
+							mysqli_stmt_bind_param($stmt, "i", $teamInfo['teamOrg']);
+							mysqli_stmt_execute($stmt);
+						}else
+							die(mysqli_error($link));
+						mysqli_close($link);
+						
+						// Step 2 and 3. Set all orginization members team to NULL and permissions to 0 (except the current user)
+						$link = connect_db_update();
+						if($stmt = mysqli_prepare($link, "UPDATE users SET permissions = 0, team = NULL WHERE org = ? AND id <> ?"))
+						{
+							mysqli_stmt_bind_param($stmt, "ii", $teamInfo['teamOrg'], $_SESSION['uid']);
+							mysqli_stmt_execute($stmt);
+						}else
+							die(mysqli_error($link));
+						if($stmt = mysqli_prepare($link, "UPDATE users SET team = NULL WHERE id = ?"))
+						{
+							mysqli_stmt_bind_param($stmt, "i", $_SESSION['uid']);
+							mysqli_stmt_execute($stmt);
+						}else
+							die(mysqli_error($link));
+						mysqli_close($link);
+						
+						$link = connect_db_read();
+						$linki = connect_db_insert();
+						foreach($_POST["teamLeaderList"] as $option)
+						{
+							$stmt = "SELECT first_name, last_name, org FROM users WHERE id = ".$option." LIMIT 1";
+							if(mysqli_multi_query($link, $stmt))
+							{
+								if($result = mysqli_store_result($link))
+								{
+									while($row = mysqli_fetch_assoc($result))
+									{
+										if($stmt = mysql_prepare($linki, "INSERT INTO teams (name, org, leader) values (?, ?, ?)"))
+										{
+											$newTeamName = $result['first_name']." ".$result['last_name']."'s Team";
+											mysqli_stmt_bind_param($linki, "sii", $newTeamName, 
+											$result['org'],
+											$option);
+											mysqli_stmt_execute($stmt);
+											$newID = mysqli_insert_id($linki); // use the new Team ID to update the leader's Team number
+										}
+									}
+									mysqli_free_result($result);
+								}
+							}
+						}
+						mysqli_close($linki);
+						mysqli_close($link);
+					}else{
+						echo '	<head>
 		<meta charset="urf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Admin Controls - Create Teams</title>
+<<<<<<< HEAD
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script>
 			$(document).ready(function(){
@@ -84,6 +153,29 @@ if(login_check())
 				});
 			});
 		</script>
+=======
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script>
+			$(document).ready(function(){
+				$("#teamLeaderList").width($("#regMemberList").width());
+				$("#regMemberList").width($("#teamLeaderList").width());
+				
+				$("#leftToRight").click(function(){
+					var selectedLeft = $("#regMemberList option:selected").each(function(index){
+						$("#teamLeaderList").append(this);
+					});
+				});
+					
+				$("#rightToLeft").click(function(){
+					var selectedRight = $("#teamLeaderList option:selected").each(function(index){
+						$("#regMemberList").append(this);
+					});
+					
+				});
+			});
+</script>
+>>>>>>> origin/Users-Adding-Categories
 	</head>
 	<body>
 		<div id="page_content">
@@ -92,12 +184,13 @@ if(login_check())
 				<h3>Scholarship Tracking System</h3>
 			</div>
 			<div id="navbar">'."\n";
-				print_navbar_items();
-					echo "\n".'			</div>
+						print_navbar_items();
+						echo "\n".'			</div>
 			<div id="container">
 				<form method="POST" action="" style="margin: 0 auto; width: 60%">
 					<h3>Select members of your team to be team leaders.</h3>
 					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
+<<<<<<< HEAD
 					<br>
 					<table border="0">
 						<tr>
@@ -115,9 +208,28 @@ if(login_check())
 						mysqli_stmt_execute($stmt);
 						mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName);
 						while(mysqli_stmt_fetch($stmt))
+=======
+					<select id="regMemberList" name="regMemberList" size="20" multiple style="display: inline-block;">'."\n";
+						$teamInfo = getTeam($_SESSION['uid']);
+						$link = connect_db_read();
+						if($stmt = mysqli_prepare($link, "SELECT users.id, users.first_name, users.last_name, teams.name, teams.id FROM users LEFT JOIN teams ON users.id=teams.leader WHERE users.org = ? and users.id <> ?"))
+>>>>>>> origin/Users-Adding-Categories
 						{
-							echo '						<option value="'.$uid.'">'.$uLastName.', '.$uFirstName.'</option>'."\n";
+							mysqli_stmt_bind_param($stmt, "ii", $teamInfo['teamOrg'], $_SESSION['uid']);
+							mysqli_stmt_execute($stmt);
+							mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName, $teamName, $teamID);
+							$leaders = array();
+							while(mysqli_stmt_fetch($stmt))
+							{
+								if($teamID == NULL)
+									echo '						<option value="'.$uid.'">'.$uLastName.', '.$uFirstName.'</option>'."\n";
+								else{
+									$leaders[] = array('uid'=>$uid, 'uFirstName'=>$uFirstName, 'uLastName'=>$uLastName, 'teamName'=>$teamName, 'teamID'=>$teamID);
+								}
+							}
+							mysqli_stmt_close($stmt);
 						}
+<<<<<<< HEAD
 						mysqli_stmt_close($stmt);
 					}
 					echo '								</select>
@@ -134,9 +246,25 @@ if(login_check())
 							</td>
 						</tr>
 					</table>
+=======
+						echo '					</select>'.$teamInfo['teamOrg'].'
+					<table border="0" style="display: inline-block; vertical-align: 125px;">
+						<tr><td><button id="leftToRight" type="button" style="padding: 15px;">-&gt;</button></td></tr>
+						<tr><td><button id="rightToLeft" type="button" style="padding: 15px;">&lt;-</button></td></tr>
+					</table>
+					<select id="teamLeaderList" name="teamLeaderList" size="20" multiple style="display: inline-block;">'.'\n';
+						foreach($leaders as $row)
+						{
+							echo '						<option value="'.$row['uid'].'">'.$row['uLastName'].', '.$row['uFirstName'].'</option>'."\n";
+						}
+						echo '					</select>
+					<p> !!! WARNING !!!: Submitting this form will delete all teams and reassign team leaders. All current team information will be lost.</p>
+					<input type="submit" value="Create Teams" onclick="return confirm(\'Submitting this form will delete all current team information. Do you wish to continue? (Press OK to continue or Cancel to abort)\')"/>
+>>>>>>> origin/Users-Adding-Categories
 				</form>
 			</div>
 		</div>'."\n";
+					}
 				}else
 					echo '<h2>Permission Error: You do not have permission to view this page.</h2>';
 			break;
