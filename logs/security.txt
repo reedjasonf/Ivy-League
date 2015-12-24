@@ -113,3 +113,5 @@ Direct visit to /dashboard.php from IP 172.56.12.251. [2015-10-14 18:07:28:92342
 =======
 Direct visit to /Ivy-League/admin_panel.php from IP ::1. [2015-09-05 23:45:40:26400]
 >>>>>>> origin/Users-Adding-Categories
+Direct visit to /Ivy-League/dashboard.php from IP ::1. [2015-12-18 15:03:56:813285]
+Direct visit to /Ivy-League/admin_panel.php from IP ::1. [2015-12-19 08:31:02:72342]

@@ -208,6 +208,23 @@ body#class_details div#scroll_form_edit_grade{
     -webkit-border-radius: 10px 10px 10px 10px;
 }
 
+body#class_details div#scroll_form_add_category{
+	top: -300px; /* start off the screen */
+	width: 26%;
+	position: fixed;
+	z-index: 101;
+	margin: 0 0 0 -10%;
+	left: 50%;
+	//height: 30%;
+	display: box;
+	background-color: #465150;
+	color: white;
+	border: #aaa solid 2px;
+	border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+}
+
 body#class_details div#scroll_form_add_assignment{
 	top: -165px; /* start off the screen */
 	width: 24%;
@@ -232,6 +249,10 @@ body#class_details div#scroll_form_add_assignment img#add-hideBtn{
 	cursor: pointer;
 }
 
+body#class_details div#scroll_form_add_category img#cat-hideBtn{
+	cursor: pointer;
+}
+
 body#class_details div#scroll_form_edit_grade form div.centered{
 	width: 90%;
 	margin: 30px auto;
@@ -242,7 +263,12 @@ body#class_details div#scroll_form_add_assignment form div.centered{
 	margin: 30px auto;
 }
 
-a.edit-grade{
+body#class_details div#scroll_form_add_category form div.centered{
+	width: 90%;
+	margin: 30px auto;
+}
+
+a.edit-grade, a#addCat{
 	cursor: pointer;
 }
 

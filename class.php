@@ -281,17 +281,191 @@ if(login_check())
 			{
 				if(!empty($_POST['edit-submit']))
 				{
+					// clean up the variables
 					$link = connect_db_update();
-					$stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?") or die(mysqli_error($link));
-					mysqli_stmt_bind_param($stmt, "sddi", str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"], $_POST["hiddenID"]);
-					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+					$action = array();
+					$action['result'] = null;
+					if(empty($_POST['description']))
+					{
+						$action['result'] = 'error';
+						$action['text'] = 'Description field is required and can not be blank.';
+					}else{
+						if(empty($_POST['points']))
+						{
+							$action['result'] = 'error';
+							$action['text'] = 'Points field is required and can not be blank.';
+						}else{
+							if(empty($_POST['max_points']))
+							{
+								$action['result'] = 'error';
+								$action['text'] = 'Max points field is required and can not be blank.';
+							}else{
+								// all fields not blank, no errors
+								
+								// clean fields and validate
+								$newDescription = mysqli_real_escape_string($link, str_replace(';','',$_POST["description"]));
+								$points = mysqli_real_escape_string($link, $_POST["points"]);
+								$maxPoints = mysqli_real_escape_string($link, $_POST["max_points"]);
+								if($stmt = mysqli_prepare($link, "UPDATE grades SET description=?, points_earned=?, max_points=? WHERE id=?"))
+								{
+									mysqli_stmt_bind_param($stmt, "sddi", $newDescription, $points, $maxPoints, $_POST["hiddenID"]);
+									if(!mysqli_stmt_execute($stmt))
+									{
+										$action['result'] = 'error';
+										$action['text'] = 'Row not updated. Reason: '.mysqli_error($link);
+									}else{
+										if(mysqli_stmt_affected_rows($stmt) == 1)
+										{
+											$action['result'] = 'success';
+											$action['text'] = 'Updated Successfully.';
+										}else{
+											$action['result'] = 'unknown';
+											$action['text'] = 'No errors were detected but zero rows were affected by the command. Reason: '.mysqli_error($link);
+										}
+									}
+									mysqli_stmt_close($stmt);
+								}else{
+									$action['result'] = 'error';
+									$action['text'] = 'Row not updated. Reason: '.mysqli_error($link);
+								}
+							}
+						}
+					}
+					mysqli_close($link);
 				}
 				if(!empty($_POST['add-submit']))
 				{
 					$link = connect_db_insert();
-					$stmt = mysqli_prepare($link, "INSERT INTO grades (category, description, points_earned, max_points) VALUES (?,?,?,?)") or die(mysqli_error($link));
-					mysqli_stmt_bind_param($stmt, "isdd", $_POST["catID"], str_replace(';','',$_POST["description"]), $_POST["points"], $_POST["max_points"]);
-					mysqli_stmt_execute($stmt) or die(mysqli_error($link));
+					$action = array();
+					$action['result'] = null;
+					if(empty($_POST['description']))
+					{
+						$action['result'] = 'error';
+						$action['text'] = 'Description field is required and can not be blank.';
+					}else{
+						if(empty($_POST['points']))
+						{
+							$action['result'] = 'error';
+							$action['text'] = 'Points field is required and can not be blank.';
+						}else{
+							if(empty($_POST['max_points']))
+							{
+								$action['result'] = 'error';
+								$action['text'] = 'Max points field is required and can not be blank.';
+							}else{
+								// all fields not blank, no errors
+								
+								// clean fields and validate
+								$newDescription = mysqli_real_escape_string($link, str_replace(';','',$_POST["description"]));
+								$points = mysqli_real_escape_string($link, $_POST["points"]);
+								$maxPoints = mysqli_real_escape_string($link, $_POST["max_points"]);
+								
+								if($stmt = mysqli_prepare($link, "INSERT INTO grades (category, description, points_earned, max_points) VALUES (?,?,?,?)"))
+								{
+									mysqli_stmt_bind_param($stmt, "isdd", $_POST["catID"], $newDescription, $points, $maxPoints);
+									if(!mysqli_stmt_execute($stmt))
+									{
+										$action['result'] = 'error';
+										$action['text'] = 'Row not inserted into database. Reason: '.mysqli_error($link);
+									}else{
+										if(mysqli_stmt_affected_rows($stmt) == 1)
+										{
+											$action['result'] = 'success';
+											$action['text'] = 'Grade Added Successfully.';
+										}else{
+											$action['result'] = 'unknown';
+											$action['text'] = 'No errors were detected but zero rows were affected by the command. Reason: '.mysqli_error($link);
+										}
+									}
+									mysqli_stmt_close($stmt);
+								}else{
+									$action['result'] = 'error';
+									$action['text'] = 'Row not inserted into database. Reason: '.mysqli_error($link);
+								}
+							}
+						}
+					}
+					mysqli_close($link);
+				}
+				if(!empty($_POST['cat-submit']))
+				{
+					// clean up the variables
+					$link = connect_db_insert();
+					$action = array();
+					$action['result'] = null;
+					if(empty($_POST['catName']))
+					{
+						$action['result'] = 'error';
+						$action['text'] = 'Name field is required and can not be blank.';
+					}else{
+						if(empty($_POST['categoryType']))
+						{
+							$action['result'] = 'error';
+							$action['text'] = 'Type field is required and can not be blank.';
+						}else{
+							if(empty($_POST['category_points']))
+							{
+								$action['result'] = 'error';
+								$action['text'] = 'Points field is required and can not be blank.';
+							}else{
+								if(($_POST['category_special'] == "dropAfterN" || $_POST['category_special'] == "dropLowestN") && empty($_POST['category_n']))
+								{
+									$action['result'] = 'error';
+									$action['text'] = 'N field is required when visible depending on the value of the special field.';
+								}else{
+									// all required fields filled out, no errors
+									
+									// validate and clean the fields
+									$newCatName = mysqli_real_escape_string($link, $_POST['catName']);
+									$newCatType = mysqli_real_escape_string($link, $_POST['categoryType']);
+									$newPoints = mysqli_real_escape_string($link, $_POST['category_points']);
+									$newN = mysqli_real_escape_string($link, $_POST['category_n']);
+									
+									$dropLowest = 0;
+									$dropAfter = 0;
+									$finalReplaces = false;
+									switch($_POST['category_special'])
+									{
+										case "dropAfterN":
+											$dropAfter = $newN;
+										break;
+										
+										case "dropLowestN":
+											$dropLowest = $newN;
+										break;
+										
+										case "finalReplacesLowestExam":
+											$finalReplaces = true;
+										break;
+									}
+									
+									if($stmt = mysqli_prepare($link, "INSERT INTO grade_categories (name, class, type, max_points, lowest_drop, drop_after, finalReplacesLowExam) VALUES (?, ?, ?, ?, ?, ?, ?)"))
+									{
+										mysqli_stmt_bind_param($stmt, 'sisiiii', $newCatName, $_POST['classID'], $newCatType, $newPoints, $dropLowest, $dropAfter, $finalReplaces);
+										if(!mysqli_stmt_execute($stmt))
+										{
+											$action['result'] = 'error';
+											$action['text'] = 'Row not inserted into the database. Reason: '.mysqli_error($link);
+										}else{
+											if(mysqli_stmt_affected_rows($stmt) == 1)
+											{
+												$action['result'] = 'success';
+												$action['text'] = 'Category Created Successfully.';
+											}else{
+												$action['result'] = 'unknown';
+												$action['text'] = 'No errors were detected but zero rows were returned by the database. Reason: '.mysqli_error($link);
+											}
+										}
+										mysqli_stmt_close($stmt);
+									}else{
+										$action['result'] = 'error';
+										$action['text'] = 'Row not inserted into the database. Reason: '.mysqli_error($link);
+									}
+								}
+							}
+						}
+					}
+					mysqli_close($link);
 				}
 			}
 ?>
@@ -299,9 +473,15 @@ if(login_check())
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Class Details</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script> 
+		$(document).ready(function(){
+			$(".disappear").delay(2500).slideUp(1200, "swing");
+		});
+		</script> 
 	</head>
 	<body id="class_details">
-	<img src="images/lockout.png" width="100%" height="100%" id="lockoutImg" style="position: absolute;left: 0px;top: 0px;z-index: 100;display: none;"/>
+	<img src="images/lockout.png" width="100%" height="200%" id="lockoutImg" style="position: absolute;left: 0px;top: 0px;z-index: 100;display: none;"/>
 	
 	<div id="scroll_form_edit_grade">
 		<form method="POST" action="">
@@ -330,6 +510,56 @@ if(login_check())
 		</form>
 	</div>
 	
+	<div id="scroll_form_add_category">
+		<form method="POST" action="">
+		<img id="cat-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
+		<div class="centered">
+		<label for="catName">Category Name: </label><input type="text" id="addCatName" name="catName" required/><br>
+		<label for="categoryType">Type: </label><select name="categoryType" required>
+			<option value="homework">homework</option>
+			<option value="quiz">quiz</option>
+			<option value="exam">exam</option>
+			<option value="lab">lab</option>
+			<option value="in-class">in-class</option>
+			<option value="assignment">assignment</option>
+			<option value="project">project</option>
+			<option value="other">other</option>
+		</select>
+		<label for="category_points">Points: </label><input type="number" id="category_points" name="category_points" min="1" style="width: 5em" required><br>
+		<label for="category_special">Special: </label><select id="category_special" name="category_special" onchange="toggleSpecialOptions()">
+			<option value="" selected></option><option value="dropAfterN">Drop After N Assignments</option>
+			<option value="dropLowestN">Drop Lowest N Assignments</option>
+			<option value="finalReplacesLowestExam">Final Exam Replaces Lowest Exam</option>
+		</select><br>
+		<label for="category_n" id="category_n_label" style="display: none;">N: </label><input type="number" id="category_n" name="category_n" min="1" step="1" style="display: none;" />
+		<br>
+		<br>
+		<input name="cat-submit" type="submit" value="Add Category"/><input type="hidden" name="classID" id="classID" value="'.$_GET['q'].'" /><br>
+		</div>
+		</form>
+		
+		<script>
+			function toggleSpecialOptions(){
+				var label = document.getElementById("category_n_label");
+				var n = document.getElementById("category_n");
+				var selectedOption = document.getElementById("category_special").value;
+				
+				if(selectedOption == "dropAfterN" || selectedOption == "dropLowestN")
+				{
+					label.style.display = "inline";
+					n.style.display = "inline";
+					n.required = true;
+				}else{
+					n.style.display = "none";
+					n.value = "";
+					label.style.display = "none";
+					n.removeAttribute("required");
+				}
+			}
+		</script>
+		
+	</div>
+	
 		<div id="page_content">
 			<div id="banner">
 				<h1>Ivy-League</h1>
@@ -338,6 +568,23 @@ if(login_check())
 			<div id="navbar">
 				<?php print_navbar_items(); ?>
 			</div>
+<?php
+	if(isset($action))
+	switch($action['result'])
+	{
+		case "success":
+			echo '			<div class="disappear" id="errorMessage" style="background: #99ff66; color: black; font-size: 1.75em; text-indent: 50px;">'.$action['text'].'</div>'."\n";
+		break;
+		
+		case "unknown":
+			echo '			<div class="disappear" id="errorMessage" style="background: #ffff66; color: black; font-size: 1.75em; text-indent: 50px;">'.$action['text'].'</div>'."\n";
+		break;
+		
+		case "error":
+			echo '			<div class="disappear" id="errorMessage" style="background: #ff5050; font-size: 1.75em; text-indent: 50px;">'.$action['text'].'</div>'."\n";
+		break;
+	}
+?>
 			<div id="container" style="min-height:75%">
 				<div class="wrapper">
 					<h1>Class Details</h1>
@@ -376,15 +623,15 @@ if(login_check())
 					{
 						echo '<p class="category"><a href="class.php?o=category&amp;q='.$cat_id.'" target="category_details_window">'.$category.'</a> <img src="images/insert.gif" width="16px" height="16px" class="insert-grade" catID="'.$cat_id.'" catName="'.$category.'" alt="Add assignment to this category"/></p>';
 					}
-?>
-				</div>
-				<iframe id="category_details_window" name="category_details_window" style="margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc="<!DOCTYPE html><html lang='en' dir='ltr'><head><meta charset='utf-8'><link rel='stylesheet' type='text/css' href='custom.css.php'><title></title></head><body id='category_details'></body></html>" >Your browser does not support frames</iframe>
+
+					echo '				</div>
+				<iframe id="category_details_window" name="category_details_window" style="margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc=\'<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><link rel="stylesheet" type="text/css" href="custom.css.php"><title></title></head><body id="category_details"></body></html>\' >Your browser does not support frames</iframe>
 				<br>
 				<br>
-				<a href="">Add Category</a>
+				<a id="addCat" classID="'.$_GET['q'].'">Add Category</a>
 				<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-				<script src="add-assign.js"></script>
-<?php
+				<script src="add-assign.js"></script>'."\n";
+
 				}else{
 					echo 'Class details couldn\'t be found';
 				}

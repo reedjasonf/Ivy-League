@@ -2,6 +2,7 @@
 include_once('common_functions.php');
 include_once('grade_functions.php');
 include_once('objects/class_def.php');
+include_once ('../../scholarbowl_config.php');
 sec_session_start();
 if(COMPRESSION == TRUE){
 	ob_start("ob_gzhandler");
@@ -101,33 +102,67 @@ if(login_check())
 							die(mysqli_error($link));
 						mysqli_close($link);
 						
-						$link = connect_db_read();
-						$linki = connect_db_insert();
-						foreach($_POST["teamLeaderList"] as $option)
-						{
-							$stmt = "SELECT first_name, last_name, org FROM users WHERE id = ".$option." LIMIT 1";
-							if(mysqli_multi_query($link, $stmt))
+						$newLeaders = array();
+						if(!empty($_POST['teamLeaderList']))
+							foreach($_POST['teamLeaderList'] as $option)
 							{
-								if($result = mysqli_store_result($link))
+								$link = connect_db_read(); // so information on the new leaders can be retrieved
+								if($stmt = mysqli_prepare($link, "SELECT first_name, last_name FROM users WHERE id = ? LIMIT 1"))
 								{
-									while($row = mysqli_fetch_assoc($result))
+									mysqli_stmt_bind_param($stmt, "i", $option);
+									mysqli_stmt_execute($stmt);
+									mysqli_stmt_bind_result($stmt, $firstName, $lastName);
+									mysqli_stmt_fetch($stmt);
+									$newLeaders[] = array("firstName"=>$firstName, "lastName"=>$lastName);
+									$linki = connect_db_insert(); // so new rows can be placed in the teams table
+									if($stmt2 = mysqli_prepare($linki, "INSERT INTO teams (name, org, leader) VALUES (?, ?, ?)"))
 									{
-										if($stmt = mysql_prepare($linki, "INSERT INTO teams (name, org, leader) values (?, ?, ?)"))
+										$teamName = $firstName." ".$lastName."'s Team";
+										mysqli_stmt_bind_param($stmt2, "sii", $teamName, $teamInfo['teamOrg'], $option);
+										mysqli_stmt_execute($stmt2);
+										$newTeamID = mysqli_insert_id($linki);
+										
+										$linku = connect_db_update(); // so the leader's team in their record can be updated
+										if($stmt3 = mysqli_prepare($linku, "UPDATE users SET team = ?, permissions = ? WHERE id = ? LIMIT 1"))
 										{
-											$newTeamName = $result['first_name']." ".$result['last_name']."'s Team";
-											mysqli_stmt_bind_param($linki, "sii", $newTeamName, 
-											$result['org'],
-											$option);
-											mysqli_stmt_execute($stmt);
-											$newID = mysqli_insert_id($linki); // use the new Team ID to update the leader's Team number
-										}
-									}
-									mysqli_free_result($result);
-								}
+											$permissions = DEFAULT_TEAMLEADER_PRIV;
+											mysqli_stmt_bind_param($stmt3, "iii", $newTeamID, $permissions, $option);
+											mysqli_stmt_execute($stmt3);
+										}else
+											die(mysqli_error($link));
+										mysqli_close($linku);
+									}else
+										die(mysqli_error($link));
+									mysqli_close($linki);
+								}else
+									die(mysqli_error($link));
+								mysqli_close($link);
 							}
-						}
-						mysqli_close($linki);
-						mysqli_close($link);
+						echo '	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="custom.css.php">
+		<title>Admin Controls - Create Teams</title>
+	</head>
+	<body>
+		<div id="page_content">
+			<div id="banner">
+				<h1>Ivy-League</h1>
+				<h3>Scholarship Tracking System</h3>
+			</div>
+			<div id="navbar">'."\n";
+						print_navbar_items();
+						echo "\n".'			</div>
+			<div id="container">'."\n";
+						if(count($newLeaders)>0)
+						{
+							echo '<h3>The following members have been given Leader access and teams have been created:</h3>'."\n";
+							foreach($newLeaders as $m)
+								echo '			<p>'.$m["firstName"]." ".$m["lastName"]."</p>\n";
+						}else
+							echo '<h3>All team leaders were removed and teams have been deleted.</h3>';
+							echo '<h3><a href="admin_panel.php">Click here to return to the Admin Panel</a></h3>
+			</div>
+		</div>'."\n";
 					}else{
 						echo '	<head>
 		<meta charset="urf-8">
@@ -136,20 +171,26 @@ if(login_check())
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script>
 			$(document).ready(function(){
-				document.getElementById("leader_members").style.minWidth = $("#regular_members").width()+"px";
-				document.getElementById("regular_members").style.minWidth = $("#regular_members").width()+"px";
+				$("#teamLeaderList").width($("#regMemberList").width());
+				$("#regMemberList").width($("#teamLeaderList").width());
 				
-				$("#move_right").click(function(){
-					$("#regular_members option:selected").each(function(){
-						$("#leader_members").append(this);
+				$("#leftToRight").click(function(){
+					var selectedLeft = $("#regMemberList option:selected").each(function(index){
+						$("#teamLeaderList").append(this);
 					});
 				});
 					
-				$("#move_left").click(function(){
-					$("#leader_members option:selected").each(function(){
-						$("#regular_members").append(this);
+				$("#rightToLeft").click(function(){
+					var selectedRight = $("#teamLeaderList option:selected").each(function(index){
+						$("#regMemberList").append(this);
 					});
+					
 				});
+				
+				$("#targetForm").submit(function(){
+					$("option").prop("selected", true);
+				});
+				
 			});
 		</script>
 	</head>
@@ -163,58 +204,55 @@ if(login_check())
 						print_navbar_items();
 						echo "\n".'			</div>
 			<div id="container">
-				<form method="POST" action="" style="margin: 0 auto; width: 60%">
-					<h3>Select members of your team to be team leaders.</h3>
+				<form id="targetForm" method="POST" action="" style="margin: 0 auto; width: 60%">
+					<h3>Select members of you team to be team leaders.</h3>
 					<p>Teams will be created with the name of the team leader. Team Leaders will be given a single opportunity to rename their team.</p>
-					<br>
 					<table border="0">
 						<tr>
-							<td><h3>Members</h3></td>
+							<td>Members</td>
 							<td></td>
-							<td><h3>Team Leaders</h3></td>
-						</tr><tr>
+							<td>Team Leaders</td>
+						</tr>
+						<tr>
 							<td>
-								<select size="20" multiple style="display: inline-block;" id="regular_members">'."\n";
-					$teamInfo = getTeam($_SESSION['uid']);
-					$link = connect_db_read();
-					if($stmt = mysqli_prepare($link, "SELECT id, first_name, last_name FROM users WHERE org = ? AND permissions = 0"))
-					{
-						mysqli_stmt_bind_param($stmt, "i", $teamInfo['teamOrg']);
-						mysqli_stmt_execute($stmt);
-						mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName);
-						while(mysqli_stmt_fetch($stmt))
+								<select id="regMemberList" name="regMemberList[]" size="20" multiple style="display: inline-block;">'."\n";
+						$teamInfo = getTeam($_SESSION['uid']);
+						$link = connect_db_read();
+						$leaders = array();
+						if($stmt = mysqli_prepare($link, "SELECT users.id, users.first_name, users.last_name, teams.name, teams.id FROM users LEFT JOIN teams ON users.id=teams.leader WHERE users.org = ? and users.id <> ?"))
 						{
 							mysqli_stmt_bind_param($stmt, "ii", $teamInfo['teamOrg'], $_SESSION['uid']);
 							mysqli_stmt_execute($stmt);
 							mysqli_stmt_bind_result($stmt, $uid, $uFirstName, $uLastName, $teamName, $teamID);
-							$leaders = array();
+							
 							while(mysqli_stmt_fetch($stmt))
 							{
 								if($teamID == NULL)
-									echo '						<option value="'.$uid.'">'.$uLastName.', '.$uFirstName.'</option>'."\n";
+									echo '									<option value="'.$uid.'">'.$uLastName.', '.$uFirstName.'</option>'."\n";
 								else{
 									$leaders[] = array('uid'=>$uid, 'uFirstName'=>$uFirstName, 'uLastName'=>$uLastName, 'teamName'=>$teamName, 'teamID'=>$teamID);
 								}
 							}
 							mysqli_stmt_close($stmt);
 						}
-						mysqli_stmt_close($stmt);
-					}
-					echo '								</select>
+						echo '								</select>
 							</td>
 							<td>
-								<table border="0" style="display: inline-block; vertical-align: middle;">
-									<tr><td><button type="button" style="padding: 15px;" id="move_right">&gt;</button></td></tr>
-									<tr><td><button type="button" style="padding: 15px;" id="move_left">&lt;</button></td></tr>
+								<table border="0" style="display: inline-block; vertical-align: 125px;">
+									<tr><td><button id="leftToRight" type="button" style="padding: 15px;">-&gt;</button></td></tr>
+									<tr><td><button id="rightToLeft" type="button" style="padding: 15px;">&lt;-</button></td></tr>
 								</table>
 							</td>
 							<td>
-								<select size="20" multiple style="display: inline-block;" id="leader_members">
-								</select>
+								<select id="teamLeaderList" name="teamLeaderList[]" size="20" multiple style="display: inline-block;">'.'\n';
+						foreach($leaders as $row)
+						{
+							echo '									<option value="'.$row['uid'].'">'.$row['uLastName'].', '.$row['uFirstName'].'</option>'."\n";
+						}
+						echo '								</select>
 							</td>
 						</tr>
 					</table>
-
 					<p> !!! WARNING !!!: Submitting this form will delete all teams and reassign team leaders. All current team information will be lost.</p>
 					<input type="submit" value="Create Teams" onclick="return confirm(\'Submitting this form will delete all current team information. Do you wish to continue? (Press OK to continue or Cancel to abort)\')"/>
 				</form>

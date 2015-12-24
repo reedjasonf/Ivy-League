@@ -9,6 +9,14 @@ var main = function() {
 		$('#cat_label').html("Add assignment to "+this.getAttribute("catName"));
 	});
 	
+	$('#addCat').click(function() {
+		$('#scroll_form_add_category').animate({
+			top: "250px"
+		}, 400);
+		$('#lockoutImg', window.parent.document).toggle();
+		$('#classID').attr("value", this.getAttribute("classID"));
+	});
+	
 	/* Push the form up */
 	$('#add-hideBtn').click(function() {
 		$('#scroll_form_add_assignment').animate({
@@ -24,6 +32,15 @@ var main = function() {
 		}, 400);
 		$('#lockoutImg').toggle();
 	});
+	
+	$('#cat-hideBtn').click(function() {
+		$('#scroll_form_add_category').animate({
+			top: "-400px"
+		}, 400);
+		$('#lockoutImg').toggle();
+	});
+	
+	
 };
 
 $(document).ready(main);
