@@ -16,6 +16,7 @@ if(login_check())
 ?>
 	<head>
 		<meta charset="urf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Your Ivy-League Dashboard</title>
 		<script language="javascript" type="text/javascript">
@@ -44,8 +45,17 @@ if(login_check())
 			<div id="container">
 				<div class="wrapper">
 					<h1>Dashboard</h1>
-					<div id="logout_block">
-						<a href="logout.php">Logout</a>
+					<div id="right_float_wrapper">
+<?php
+	if($_SESSION["permissions"] != 0)
+		echo '						<div id="admin_block">
+							<a href="admin_panel.php">Admin</a>
+						</div>
+';
+?>
+						<div id="logout_block">
+							<a href="logout.php">Logout</a>
+						</div>
 					</div>
 				</div>
 				<div id="class_summary">
@@ -125,6 +135,7 @@ if(login_check())
 ?>
 	<head>
 		<meta charset="urf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Error: Not Logged In</title>
 	</head>
@@ -141,7 +152,7 @@ if(login_check())
 				<h2>You're not even logged in.</h2>
 				<h3>Security Error: You are trying to access a secure page while not logged in.</h3>
 <?php
-	echo $_SESSION['uid'].' '.$_SESSION['login_string'];
+	//echo $_SESSION['uid'].' '.$_SESSION['login_string'];
 	$entry = "Direct visit to ".$_SERVER['PHP_SELF']." from IP ".$_SERVER['REMOTE_ADDR'].". [".date_with_micro('Y-m-d H:i:s:u')."]\n";
 	file_put_contents("logs/security.txt", $entry, FILE_APPEND | LOCK_EX);
 ?>

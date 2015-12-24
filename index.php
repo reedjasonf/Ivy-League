@@ -36,11 +36,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		
 		// run the username through database looking for a match
 		$link = connect_db_read();
-		if($stmt = mysqli_prepare($link, "SELECT id, hashword FROM `users` WHERE username = ? LIMIT 1"))
+		if($stmt = mysqli_prepare($link, "SELECT id, hashword, permissions FROM `users` WHERE username = ? LIMIT 1"))
 		{
 			mysqli_stmt_bind_param($stmt, "s", $username);
 			mysqli_stmt_execute($stmt);
-			mysqli_stmt_bind_result($stmt, $uid, $db_hashword);
+			mysqli_stmt_bind_result($stmt, $uid, $db_hashword, $db_permissions);
 			
 			if(!mysqli_stmt_fetch($stmt))
 			{
@@ -61,6 +61,7 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 ?>
 	<head>
 		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" type="text/css" href="custom.css.php">
 		<title>Scholastic Tracking and Reward System</title>
 		<script src="https://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -102,7 +103,8 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 		$_SESSION['logged'] = True;
 		$_SESSION['uid'] = $uid;
 		$_SESSION['username'] = $username;
-		$_SESSION['login_string'] = hash('sha512', $db_hashword . $_SERVER['HTTP_USER_AGENT']);
+		$_SESSION['permissions'] = $db_permissions;
+		$_SESSION['login_string'] = hash('sha512', $db_hashword . $db_permissions . $_SERVER['HTTP_USER_AGENT']);
 		header("Location: dashboard.php");
 	}
 	//send the user to the dashboard page

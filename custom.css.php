@@ -5,9 +5,52 @@
 /****************************************/
 
 /* general tags */
+
+/* tags for responsive design */
+* {
+    box-sizing: border-box;
+}
+
+ /* For mobile phones: */
+[class*="col-"] {
+    width: 100%;
+}
+@media only screen and (min-width: 600px) {
+    /* For tablets: */
+    .col-m-1 {width: 8.33%;}
+    .col-m-2 {width: 16.66%;}
+    .col-m-3 {width: 25%;}
+    .col-m-4 {width: 33.33%;}
+    .col-m-5 {width: 41.66%;}
+    .col-m-6 {width: 50%;}
+    .col-m-7 {width: 58.33%;}
+    .col-m-8 {width: 66.66%;}
+    .col-m-9 {width: 75%;}
+    .col-m-10 {width: 83.33%;}
+    .col-m-11 {width: 91.66%;}
+    .col-m-12 {width: 100%;}
+}
+@media only screen and (min-width: 768px) {
+    /* For desktop: */
+    .col-1 {width: 8.33%;}
+    .col-2 {width: 16.66%;}
+    .col-3 {width: 25%;}
+    .col-4 {width: 33.33%;}
+    .col-5 {width: 41.66%;}
+    .col-6 {width: 50%;}
+    .col-7 {width: 58.33%;}
+    .col-8 {width: 66.66%;}
+    .col-9 {width: 75%;}
+    .col-10 {width: 83.33%;}
+    .col-11 {width: 91.66%;}
+    .col-12 {width: 100%;}
+}
+
+/* end tags for responsive design */
+
 html {
     font-size: 100%;
-	color: #125B53;
+	color: #FFFFFF;
 	font-family: Calibri;
 }
 
@@ -53,16 +96,22 @@ div#navbar {
 	background-color: #35A33C;
 }
 
-div#logout_block {
-	float: right;
+div#right_float_wrapper {
+		float: right;
+		display: inline-block;
+}
+
+div#admin_block, div#logout_block  {
 	font-size: 120%;
 	line-height: 120%;
 	font-weight: bold;
-	color: #125B53;
+	color: #FFFFFF;
+	display: inline;
+	margin-left: 1.5em;
 }
 
-div#logout_block a:visited{
-	color: #125B53;
+div#logout_block a:visited, div#admin_block a:visited{
+	color: #FFFFFF;
 }
 
 div#navbar p.navcurrent{
@@ -106,7 +155,7 @@ div#container{
 }
 
 body#indexlogin div#container{
-	width: 30em;
+	width: 22em;
 	text-align: left;
 	margin: 0 auto;
 }
@@ -139,7 +188,7 @@ body#create_account_form label{
 
 div#container div.wrapper h1{
 	display: inline-block;
-	color: #125B53;
+	color: #FFFFFF;
 }
 
 body#class_details div#scroll_form_edit_grade{
@@ -159,15 +208,31 @@ body#class_details div#scroll_form_edit_grade{
     -webkit-border-radius: 10px 10px 10px 10px;
 }
 
+body#class_details div#scroll_form_add_category{
+	top: -300px; /* start off the screen */
+	width: 26%;
+	position: fixed;
+	z-index: 101;
+	margin: 0 0 0 -10%;
+	left: 50%;
+	//height: 30%;
+	display: box;
+	background-color: #465150;
+	color: white;
+	border: #aaa solid 2px;
+	border-radius: 10px 10px 10px 10px;
+    -moz-border-radius: 10px 10px 10px 10px;
+    -webkit-border-radius: 10px 10px 10px 10px;
+}
+
 body#class_details div#scroll_form_add_assignment{
 	top: -165px; /* start off the screen */
-	width: 20%;
+	width: 24%;
 	position: fixed;
 	z-index: 102;
 	margin: 0 0 0 -10%;
 	left: 50%;
-	height: 160px;
-	display: box;
+	display: block;
 	background-color: #465150;
 	color: white;
 	border: #aaa solid 2px;
@@ -184,6 +249,10 @@ body#class_details div#scroll_form_add_assignment img#add-hideBtn{
 	cursor: pointer;
 }
 
+body#class_details div#scroll_form_add_category img#cat-hideBtn{
+	cursor: pointer;
+}
+
 body#class_details div#scroll_form_edit_grade form div.centered{
 	width: 90%;
 	margin: 30px auto;
@@ -194,7 +263,12 @@ body#class_details div#scroll_form_add_assignment form div.centered{
 	margin: 30px auto;
 }
 
-a.edit-grade{
+body#class_details div#scroll_form_add_category form div.centered{
+	width: 90%;
+	margin: 30px auto;
+}
+
+a.edit-grade, a#addCat{
 	cursor: pointer;
 }
 
@@ -210,10 +284,10 @@ body#dashboard div#class_summary{
     -moz-box-shadow: 10px 10px 2px #000 inset;
     -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 38%;
+	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-left: 4%;
+	margin-left: 3%;
 }
 
 body#dashboard div#class_summary h2{
@@ -243,10 +317,10 @@ body#dashboard div#point_summary{
     -moz-box-shadow: 10px 10px 2px #fff inset;
     -webkit-box-shadow: 1px 1px 2px #fff inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 38%;
+	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-right: 4%;
+	margin-right: 3%;
 	float: right;
 }
 
@@ -260,11 +334,13 @@ body#dashboard div#point_summary div.pt_line_wrapper {
 
 body#dashboard div#point_summary div.pt_class_line {
 	display: inline-block;
+	color: #17731D;
 }
 
 body#dashboard div#point_summary div.class_rewards {
 	display: inline-block;
 	float: right;
+	color: #17731D;
 }
 
 body#dashboard div#point_summary div.pt_cat_line {
@@ -282,6 +358,8 @@ body#dashboard div#point_summary div.pt_cat_line div.pt_cat {
 
 div.singleclass{
 	font-size: 130%;
+	display: inline-block;
+	width: 100%;
 }
 
 div.singleclass div.class_name {
@@ -289,17 +367,21 @@ div.singleclass div.class_name {
 }
 
 div.singleclass div.class_points {
-	display: inline-block;
+	display: inline;
+	color: #17731D;
 }
 
 div.singleclass div.class_letter_grade {
 	display: inline-block;
 	margin-left: 20px;
 	width: 30px;
+	color: #17731D;
 }
 
 div#class_summary div.singleclass div.wrapper {
-	display: inline-block;
+	display: inline;
+	margin-left: auto;
+	margin-right: 0px;
 	float: right;
 }
 
