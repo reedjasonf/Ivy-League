@@ -36,7 +36,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		
 		// run the username through database looking for a match
 		$link = connect_db_read();
-		if($stmt = mysqli_prepare($link, "SELECT id, hashword, permissions FROM `users` WHERE username = ? LIMIT 1"))
+		if($stmt = mysqli_prepare($link, "SELECT id, hashword, permissions FROM `users` WHERE username = ? AND active = 1 LIMIT 1"))
 		{
 			mysqli_stmt_bind_param($stmt, "s", $username);
 			mysqli_stmt_execute($stmt);
