@@ -72,6 +72,25 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		}
 	}
 	
+	// check to see if the email is already taken
+	$link = connect_db_read();
+	if($stmt = mysqli_prepare($link, "SELECT 1 FROM users WHERE email = ?"))
+	{
+		mysqli_stmt_bind_param($stmt, "s", mysqli_real_escape_string($link, $_POST['email_fld']));
+		if(mysqli_stmt_execute($stmt))
+		{
+			mysqli_stmt_store_result($stmt);
+			if(mysqli_stmt_num_rows($stmt) >= 1)
+			{
+				$email_err = 'That email address is already associated with an account.';
+			}
+		}else{
+			$email_err = 'Database execution error. Reason: '.mysqli_error($link);
+		}
+	}else{
+		$email_err = 'Database statement error. Reason: '.mysqli_error($link);
+	}
+	
 	// if no errors, submit data to database
 	if(m_empty($email_err, $password_err, $name_err, $username_err, $privacy_err, $terms_err, $captcha_err))
 	{
@@ -211,7 +230,7 @@ error:
 						<legend lang="en" dir="ltr">Contact Information</legend>
 						<label for="firstname_fld">First Name: *</label><input type="text" name="firstname_fld" id="firstname_fld" required> 
 						<label for="lastname_fld">Last Name: *</label><input type="text" name="lastname_fld" id="lastname_fld" required><p class="field_error"><?php echo $name_err; ?></p><br>
-						<label for="email_fld">E-mail: *</label><input type="email" name="email_fld" id="email_fld" size="48" required><br>
+						<label for="email_fld">E-mail: *</label><input type="email" name="email_fld" id="email_fld" size="48" required><p class="field_error"><?php echo $email_err; ?></p><br>
 					</fieldset>
 					<fieldset>
 						<legend lang="en" dir="ltr">Legal Terms & Verification</legend>
