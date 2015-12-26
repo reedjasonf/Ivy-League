@@ -35,39 +35,51 @@ if(login_check())
 	</head>
 	<body id="dashboard">
 		<div id="page_content">
-			<div id="banner">
-			<h1>Ivy-League</h1>
-			<h3>Scholarship Tracking System</h3>
+			<div class="row">
+				<div id="banner" class="col-12 col-m-12">
+				<h1>Ivy-League</h1>
+				<h3>Scholarship Tracking System</h3>
+				</div>
 			</div>
-			<div id="navbar">
-				<?php print_navbar_items(); ?>
+			<div class="row">
+				<div id="navbar">
+					<?php print_navbar_items(); ?>
+				</div>
 			</div>
 			<div id="container">
-				<div class="wrapper">
-					<h1>Dashboard</h1>
-					<div id="right_float_wrapper">
+				<div class="row">
+					<div class="col-7 col-m-7">
+						<h1>Dashboard</h1>
+					</div>
+					<div class="col-5 col-m-5">
+						<div id="right_float_wrapper">
 <?php
 	if($_SESSION["permissions"] != 0)
-		echo '						<div id="admin_block">
+		echo '						<div id="admin_block" style="margin-left: auto;">
 							<a href="admin_panel.php">Admin</a>
 						</div>
 ';
 ?>
-						<div id="logout_block">
+						<div id="logout_block" style="margin-right: 0px;">
 							<a href="logout.php">Logout</a>
+						</div>
 						</div>
 					</div>
 				</div>
-				<div id="class_summary">
-					<h2>Class Summary</h2>
-					<hr>
+				<div class="row">
+					<div class="col-6 col-m-12">
+						<div id="class_summary">
+							<h2>Class Summary</h2>
+							<hr>
 <?php
-					print_summary_all_classes($_SESSION['uid']);
+							print_summary_all_classes($_SESSION['uid']);
 ?>
-				</div>
-				<div id="point_summary">
-					<h2>Point Summary</h2>
-					<hr>
+						</div>
+					</div>
+					<div class="col-6 col-m-12">
+					<div id="point_summary">
+						<h2>Point Summary</h2>
+						<hr>
 <?php
 						$classes = get_user_classes($_SESSION['uid']);
 						$reward_points = [];
@@ -123,6 +135,8 @@ if(login_check())
 						}
 						//print_r($reward_points);
 ?>
+					</div>
+					</div>
 				</div>
 				<br>
 				<br>

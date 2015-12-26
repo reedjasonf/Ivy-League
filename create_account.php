@@ -75,12 +75,59 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 	// if no errors, submit data to database
 	if(m_empty($email_err, $password_err, $name_err, $username_err, $privacy_err, $terms_err, $captcha_err))
 	{
+		$action['result'] = null;
+		
 		// create a salt and create the hash string for the db
 		$hash = create_hash($hashword);
 		$dblink = connect_db_insert();		
-		$stmt = mysqli_prepare($dblink, "INSERT INTO `users` (`id`, `username`, `hashword`, `org`, `team`, `first_name`, `last_name`, `email`) VALUES (NULL, ?, ?, NULL, NULL, ?, ?, ?)") or die(mysqli_error($dblink));
-		mysqli_stmt_bind_param($stmt, "sssss", $username, $hash, $firstname, $lastname, $email);
+		$stmt = mysqli_prepare($dblink, "INSERT INTO `users` (`id`, `username`, `hashword`, `org`, `team`, `first_name`, `last_name`, `email`, `active`) VALUES (NULL, ?, ?, NULL, NULL, ?, ?, ?, 0)") or die(mysqli_error($dblink));
+		mysqli_stmt_bind_param($stmt, "sssss", mysqli_real_escape_string($dblink, $username), mysqli_real_escape_string($dblink, $hash), mysqli_real_escape_string($dblink, $firstname), mysqli_real_escape_string($dblink, $lastname), mysqli_real_escape_string($dblink, $email));
 		mysqli_stmt_execute($stmt) or die(mysqli_error($dblink));
+		
+		$userID = mysqli_insert_id($dblink);
+		
+		// insert a codeword into the confirm table so the user can confirm her email.
+		$timestamp = time();
+		$key = md5($username.$email.$timestamp);
+		if($stmt = mysqli_prepare($dblink, "INSERT INTO `confirm` (`email`, `codeword`, `date`, `userid`, `type`) VALUES (?, ?, ?, ?, 'email')"))
+		{
+			mysqli_stmt_bind_param($stmt, "sssi", $email, $key, date('Y-m-d H:i:s', $timestamp), $userID);
+			if(mysqli_stmt_execute($stmt))
+			{
+				if(mysqli_stmt_affected_rows($stmt) == 1)
+				{
+					// send the email with confirmation link
+					$subject = 'Confirm your email - Ivy League';
+					$message = '<p>Hello '.$firstname.',</p>
+<p>Please confirm your email address by clicking this <a href="localhost/Ivy-League/confirm.php?email='.urlencode($email).'&key='.urlencode($key).'">link</a>. If your browser doesn\'t display correctly, copy and paste the following URL into your browser: http://localhost/Ivy-League/confirm?email='.urlencode($email).'&key='.urlencode($key).'</p>
+<p>Do not reply to this email address. This email is sent by an automated script and this inbox is not monitored. If you need assistance please email support.</p>
+<p>Thank you,</p>
+<p>The Ivy League Team</p>';
+					$headers  = 'MIME-Version: 1.0' . "\r\n";
+					$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+					$headers .= "From: no.reply.ivyleague@gmail.com\r\n";
+					if(mail($email, $subject, $message, $headers))
+					{
+						$action['result'] = 'success';
+						$action['text'] = 'Confirmation email sent successfully.';
+					}else{
+						$action['result'] = 'error';
+						$action['text'] = 'Confirmation email not sent.';
+					}
+				}else{
+					$action['result'] = 'unknown';
+					$action['text'] = 'No errors were detected but zero rows were inserted by the command. Reason: '.mysqli_error($link);
+				}
+			}else{
+				$action['result'] = 'error';
+				$action['text'] = 'Execution error. Confirmation email not sent. Reason: '.mysqli_error($dblink);
+			}
+		}else{
+			$action['result'] = 'error';
+			$action['text'] = 'Statement error. Confirmation email not sent. Reason: '.mysqli_error($dblink);
+		}
+		// send the email with the link
+		
 		mysqli_close($dblink);
 ?>
 <!DOCTYPE>
@@ -170,7 +217,7 @@ error:
 						<legend lang="en" dir="ltr">Legal Terms & Verification</legend>
 						<label for="privacy">I have read and accept the terms of the <a href="privacy_policy.html" target="_blank">privacy policy</a>*</label><input type="checkbox" name="privacy" id="privacy" required><p class="field_error"><?php echo $privacy_err; ?></p><br>
 						<label for="terms">I have read and accept the <a href="TermsofService.html" target="_blank">Terms of Service.</a>*</label><input type="checkbox" name="terms" id="terms" required><p class="field_error"><?php echo $terms_err; ?></p><br>
-						<image src="captcha_image.php" alt="Captcha image" id="captcha_image" style="margin-left:2em"><br>
+						<img src="captcha_image.php" alt="Captcha image" id="captcha_image" style="margin-left:2em"><br>
 						<a href="#" id="reload_captcha" name="reload_captcha">Load New Image</a><br>
 						<label for="captchaGuessFld">Type the characters to prove you are human: *</label><input type="text" name="captchaGuessFld" id="captchaGuessFld" autocomplete="off" required><p class="field_error"><?php echo $captcha_err; ?></p><br>
 					</fieldset>

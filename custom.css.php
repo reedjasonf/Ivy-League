@@ -11,10 +11,22 @@
     box-sizing: border-box;
 }
 
- /* For mobile phones: */
-[class*="col-"] {
-    width: 100%;
+.row:after {
+	content: "";
+	clear: both;
+	display: block;
 }
+
+[class*="col-"] {
+	float: left;
+	padding: 15px;
+}
+
+/* For mobile phones: */
+[class*="col-m"] {
+        width: 100%;
+}
+
 @media only screen and (min-width: 600px) {
     /* For tablets: */
     .col-m-1 {width: 8.33%;}
@@ -49,7 +61,7 @@
 /* end tags for responsive design */
 
 html {
-    font-size: 100%;
+    font-size: 1em;
 	color: #FFFFFF;
 	font-family: Calibri;
 }
@@ -71,10 +83,6 @@ body#indexlogin {
 div#page_content{
 	margin-top: 0;
 	padding: 0;
-}
-
-body#indexlogin div#page_content{
-	margin-top: 15%;
 }
 
 div#banner{
@@ -102,8 +110,8 @@ div#right_float_wrapper {
 }
 
 div#admin_block, div#logout_block  {
-	font-size: 120%;
-	line-height: 120%;
+	font-size: 1.20em;
+	line-height: 1.2em;
 	font-weight: bold;
 	color: #FFFFFF;
 	display: inline;
@@ -155,7 +163,6 @@ div#container{
 }
 
 body#indexlogin div#container{
-	width: 22em;
 	text-align: left;
 	margin: 0 auto;
 }
@@ -168,6 +175,13 @@ body#indexlogin div#container input[type=submit]{
 	width: 5em;
 	height: 2em;
 	display: block;
+}
+
+body#forgot_username form{
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 60px;
+	color: black;
 }
 
 body#create_account_form div#container{
@@ -192,53 +206,33 @@ div#container div.wrapper h1{
 }
 
 body#class_details div#scroll_form_edit_grade{
-	top: -165px; /* start off the screen */
-	width: 20%;
+	top: -400px; /* start off the screen */
+	width: 100%;
 	position: fixed;
-	z-index: 101;
-	margin: 0 0 0 -10%;
-	left: 50%;
-	height: 160px;
-	display: box;
-	background-color: #465150;
-	color: white;
-	border: #aaa solid 2px;
-	border-radius: 10px 10px 10px 10px;
-    -moz-border-radius: 10px 10px 10px 10px;
-    -webkit-border-radius: 10px 10px 10px 10px;
+	z-index: 102;
+	left: 0;
+	margin: 0 0 0 0;
+	display: block;
 }
 
 body#class_details div#scroll_form_add_category{
-	top: -300px; /* start off the screen */
-	width: 26%;
+	top: -400px; /* start off the screen */
+	width: 100%;
 	position: fixed;
-	z-index: 101;
-	margin: 0 0 0 -10%;
-	left: 50%;
-	//height: 30%;
-	display: box;
-	background-color: #465150;
-	color: white;
-	border: #aaa solid 2px;
-	border-radius: 10px 10px 10px 10px;
-    -moz-border-radius: 10px 10px 10px 10px;
-    -webkit-border-radius: 10px 10px 10px 10px;
+	z-index: 102;
+	left: 0;
+	margin: 0 0 0 0;
+	display: block;
 }
 
 body#class_details div#scroll_form_add_assignment{
-	top: -165px; /* start off the screen */
-	width: 24%;
+	top: -400px; /* start off the screen */
 	position: fixed;
+	width: 100%;
 	z-index: 102;
-	margin: 0 0 0 -10%;
-	left: 50%;
+	left: 0;
+	margin: 0 0 0 0;
 	display: block;
-	background-color: #465150;
-	color: white;
-	border: #aaa solid 2px;
-	border-radius: 10px 10px 10px 10px;
-    -moz-border-radius: 10px 10px 10px 10px;
-    -webkit-border-radius: 10px 10px 10px 10px;
 }
 
 body#class_details div#scroll_form_edit_grade img#edit-hideBtn{
@@ -274,7 +268,7 @@ a.edit-grade, a#addCat{
 
 body#dashboard div#class_summary{
 	border: #aaa solid 2px;
-	line-height: 130%;
+	line-height: 1.45em;
 	border-radius: 6px 4px 2px 2px;
     -moz-border-radius: 6px 4px 2px 2px;
     -webkit-border-radius: 6px 4px 2px 2px;
@@ -284,10 +278,9 @@ body#dashboard div#class_summary{
     -moz-box-shadow: 10px 10px 2px #000 inset;
     -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-left: 3%;
+	width: 100%;
 }
 
 body#dashboard div#class_summary h2{
@@ -307,21 +300,19 @@ body#dashboard div#point_summary h2{
 
 body#dashboard div#point_summary{
 	border: #aaa solid 2px;
-	line-height: 130%;
+	line-height: 1.45em;
 	border-radius: 6px 4px 2px 2px;
     -moz-border-radius: 6px 4px 2px 2px;
     -webkit-border-radius: 6px 4px 2px 2px;
 	padding: 0.8em 1.2em;
 	background: #83DBD1;
 	text-shadow: 2px 2px #000 inset;
-    -moz-box-shadow: 10px 10px 2px #fff inset;
-    -webkit-box-shadow: 1px 1px 2px #fff inset;
+    -moz-box-shadow: 10px 10px 2px #000 inset;
+    -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-right: 3%;
-	float: right;
+	width: 100%;
 }
 
 body#dashboard div#point_summary div.hide_cats{
@@ -422,10 +413,9 @@ body#class_details div#page_content div#container div#categories_section {
     -moz-box-shadow: 10px 10px 2px #000 inset;
     -webkit-box-shadow: 1px 1px 2px #000 inset;
     box-shadow: 1px 1px 6px #fff inset;
-	width: 45%;
 	display: inline-block;
 	vertical-align: top;
-	margin-left: 2%;
+	width: 100%;
 }
 
 body#class_details div#page_content div#container div#categories_section p a{
@@ -451,6 +441,7 @@ body#class_details div#page_content div#container iframe.category_details_window
 fieldset {
 	/*font-size: 120%;
 	font-weight: bolder;*/
+	color: black;
     margin-top: 2em;
     border-radius: 6px 4px 2px 2px;
     -moz-border-radius: 6px 4px 2px 2px;

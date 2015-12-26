@@ -36,7 +36,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST")
 		
 		// run the username through database looking for a match
 		$link = connect_db_read();
-		if($stmt = mysqli_prepare($link, "SELECT id, hashword, permissions FROM `users` WHERE username = ? LIMIT 1"))
+		
+		// check the database among active accounts.
+		if($stmt = mysqli_prepare($link, "SELECT id, hashword, permissions FROM `users` WHERE username = ? AND active = 1 LIMIT 1"))
 		{
 			mysqli_stmt_bind_param($stmt, "s", $username);
 			mysqli_stmt_execute($stmt);
@@ -80,18 +82,24 @@ if($_SERVER["REQUEST_METHOD"] != "POST" || !empty($username_err) || !empty($pass
 	<body id="indexlogin">
 		<div id="page_content">
 			<div id="container">
-				<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>">
-					<fieldset>
-						<legend lang="en" dir="ltr">Log In</legend>
-						<label for="username_fld">Username: *</label><input type="text" name="username_fld" id="username_fld" required><p class="field_error"><?php echo $username_err; ?></p><br>
-						<label for="password_fld">Password: *</label><input type="password" name="password_fld" id="password_fld" required><p class="field_error"><?php echo $password_err ?></p><br>
-						<input type="hidden" name="hashed" id="hashed"><br>
-						<input type="submit" id="login_btn" value="Log In"><br>
-						Don't have an account? <a href="create_account.php">Create One</a><br>
-						<a href="account.php?q=forgot_username">Forgot Username?</a><br>
-						<a href="account.php?q=forgot_password">Forgot Password?</a>
-					</fieldset>
-				</form>
+				<div class="row">
+					<div class="col-4"></div>
+					<div class="col-4 col-m-12">
+						<form method="post" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']) ?>">
+							<fieldset>
+								<legend lang="en" dir="ltr">Log In</legend>
+								<label for="username_fld">Username: *</label><input type="text" name="username_fld" id="username_fld" required><p class="field_error"><?php echo $username_err; ?></p><br>
+								<label for="password_fld">Password: *</label><input type="password" name="password_fld" id="password_fld" required><p class="field_error"><?php echo $password_err ?></p><br>
+								<input type="hidden" name="hashed" id="hashed"><br>
+								<input type="submit" id="login_btn" value="Log In"><br>
+								Don't have an account? <a href="create_account.php">Create One</a><br>
+								<a href="account.php?function=forgot_username">Forgot Username?</a><br>
+								<a href="account.php?function=forgot_password">Forgot Password?</a>
+							</fieldset>
+						</form>
+					</div>
+					<div class="col-4"></div>
+				</div>
 			</div>
 		</div>
 <?php

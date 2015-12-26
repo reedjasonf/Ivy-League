@@ -31,16 +31,25 @@ for($s=0; $s<strlen($passphrase); $s++)
 	$posx += rand(28,36);
 	imagettftext($image, 32, rand(-25,30), $posx, rand(40,70), $white, 'ttf\Alido.otf', $passphrase[$s]);
 }
+// select a base color
+$r = rand(5,250);
+$g = rand(5,250);
+$b = rand(5,250);
 // creates horizontal squiggles
 for($j=-5; $j < 8; $j++)
 {
+	// change the base color slightly to make a gradient
+	$r = rand($r-20, $r+20);
+	$g = rand($g-20, $g+20);
+	$b = rand($b-20, $b+20);
+	$base_color = imagecolorallocate($image, $r, $g, $b);
 	$offset = rand(0,8);
 	for($i=0; $i < 400; $i++)
 	{
 		$y = $j*26+($i/$slope)*cos(($i+$offset)/$period)+($i)/7;
-		imagesetpixel($image, $i, $y, $white);
-		imagesetpixel($image, $i, $y+1, $white);
-		imagesetpixel($image, $i, $y+2, $white);
+		imagesetpixel($image, $i, $y, $base_color);
+		imagesetpixel($image, $i, $y+1, $base_color);
+		imagesetpixel($image, $i, $y+2, $base_color);
 	}
 		
 	for($k=0; $k <120; $k++){
@@ -51,12 +60,16 @@ for($j=-5; $j < 8; $j++)
 // creates vertical squiggles
 for($j=-3; $j < 20; $j++)
 {
+	$r = rand($r-20, $r+20);
+	$g = rand($g-20, $g+20);
+	$b = rand($b-20, $b+20);
+	$base_color = imagecolorallocate($image, $r, $g, $b);
 	$offset = rand(1,13);
 	for($i=0; $i < 150; $i++)
 	{
 		$x = $j*28+10*sin($i/$period)+$offset;
-		imagesetpixel($image, $x+($i/10), $i, $white);
-		imagesetpixel($image, $x+($i/10)+1, $i, $white);
+		imagesetpixel($image, $x+($i/10), $i, $base_color);
+		imagesetpixel($image, $x+($i/10)+1, $i, $base_color);
 	}
 }
 
