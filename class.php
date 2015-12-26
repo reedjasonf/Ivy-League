@@ -483,10 +483,12 @@ if(login_check())
 	<body id="class_details">
 	<img src="images/lockout.png" width="100%" height="200%" id="lockoutImg" style="position: absolute;left: 0px;top: 0px;z-index: 100;display: none;"/>
 	
-	<div id="scroll_form_edit_grade">
-		<form method="POST" action="">
-		<img id="edit-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
-		<div class="centered">
+	<div id="scroll_form_edit_grade" class="row">
+	<div class="col-3 col-m-1"></div>
+	<div class="col-6 col-m-10">
+		<form method="POST" action="" style="margin-left: auto; margin-right: auto;width: 85%;background-color: #465150;color: white;border: #aaa solid 2px;border-radius: 10px 10px 10px 10px; -moz-border-radius: 10px 10px 10px 10px; -webkit-border-radius: 10px 10px 10px 10px;">
+		<img id="edit-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:10px;right:10px;"/>
+		<div class="centered" style="width: 75%;margin-left: auto; margin-right:auto;">
 			<label for="description">Description: </label><input type="text" id="editFormDesc" name="description"/><br>
 			Points: <input type="number" id="editFormEarned" name="points" size="4" min="0" step="0.1" style="width:4em;"/> / <input type="number" id="editFormMax" name="max_points" min="0" step="0.1" size="4" style="width:4em;"/>
 			<br>
@@ -495,11 +497,16 @@ if(login_check())
 		</div>
 		</form>
 	</div>
+	<div class="col-3 col-m-1"></div>
+	</div>
 	
-	<div id="scroll_form_add_assignment">
-		<form method="POST" action="">
-		<img id="add-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
-		<div class="centered">
+	
+	<div id="scroll_form_add_assignment" class="row">
+	<div class="col-3 col-m-1"></div>
+	<div class="col-6 col-m-10">
+		<form method="POST" action="" style="margin-left: auto; margin-right: auto;width: 85%;background-color: #465150;color: white;border: #aaa solid 2px;border-radius: 10px 10px 10px 10px; -moz-border-radius: 10px 10px 10px 10px; -webkit-border-radius: 10px 10px 10px 10px;">
+		<img id="add-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:10px;right:10px;"/>
+		<div class="centered" style="width: 75%;margin-left: auto; margin-right:auto;">
 			<div id="cat_label" style="font-size: 120%;"></div>
 			<label for="description">Description: </label><input type="text" id="addFormDesc" name="description"/><br>
 			Points: <input type="number" id="addFormEarned" name="points" min="0" step="0.05" size="4" style="width:4em;"/> / <input type="number" id="addFormMax" name="max_points" min="0" step="0.05" size="4" style="width:4em;"/>
@@ -509,11 +516,15 @@ if(login_check())
 		</div>
 		</form>
 	</div>
+	<div class="col-3 col-m-1"></div>
+	</div>
 	
-	<div id="scroll_form_add_category">
-		<form method="POST" action="">
-		<img id="cat-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:-25px;right:5px;"/>
-		<div class="centered">
+	<div id="scroll_form_add_category" class="row">
+	<div class="col-3 col-m-1"></div>
+	<div class="col-6 col-m-10">
+		<form method="POST" action="" style="margin-left: auto; margin-right: auto;width: 85%;background-color: #465150;color: white;border: #aaa solid 2px;border-radius: 10px 10px 10px 10px; -moz-border-radius: 10px 10px 10px 10px; -webkit-border-radius: 10px 10px 10px 10px;">
+		<img id="cat-hideBtn" height="24px" width="24px" src="images/hidebtn.png" alt="Close form" align="right" style="position:relative;top:10px;right:10px;"/>
+		<div class="centered" style="width: 96%;margin-left: auto; margin-right:auto;">
 		<label for="catName">Category Name: </label><input type="text" id="addCatName" name="catName" required/><br>
 		<label for="categoryType">Type: </label><select name="categoryType" required>
 			<option value="homework">homework</option>
@@ -537,6 +548,8 @@ if(login_check())
 		<input name="cat-submit" type="submit" value="Add Category"/><input type="hidden" name="classID" id="classID" value="'.$_GET['q'].'" /><br>
 		</div>
 		</form>
+	</div>
+	</div>
 		
 		<script>
 			function toggleSpecialOptions(){
@@ -557,16 +570,18 @@ if(login_check())
 				}
 			}
 		</script>
-		
-	</div>
 	
 		<div id="page_content">
-			<div id="banner">
-				<h1>Ivy-League</h1>
-				<h3>Scholarship Tracking System</h3>
+			<div class="row">
+				<div id="banner" class="col-12 col-m-12">
+					<h1>Ivy-League</h1>
+					<h3>Scholarship Tracking System</h3>
+				</div>
 			</div>
-			<div id="navbar">
-				<?php print_navbar_items(); ?>
+			<div class="row">
+				<div id="navbar" class="col-12 col-m-12" style="padding-top: 0px; padding-bottom: 0px;">
+					<?php print_navbar_items(); ?>
+				</div>
 			</div>
 <?php
 	if(isset($action))
@@ -585,13 +600,17 @@ if(login_check())
 		break;
 	}
 ?>
-			<div id="container" style="min-height:75%">
-				<div class="wrapper">
+			<div id="container">
+				<div class="row">
+					<div class="col-7 col-m-7">
 					<h1>Class Details</h1>
+					</div>
+					<div class="col-5 col-m-5">
 					<div id="right_float_wrapper">
-						<div id="logout_block">
+						<div id="logout_block" style="margin-right: 0px;">
 							<a href="logout.php">Logout</a>
 						</div>
+					</div>
 					</div>
 				</div>
 <?php
@@ -611,10 +630,16 @@ if(login_check())
 				if(mysqli_stmt_fetch($stmt))
 				{
 ?>
+				<div class="row">
+				<div class="col-12 col-m-12">
 				<h2>Details for <?php echo $class_name; ?> </h2>
 				<h3>Instructor: <?php echo $class_instructor; ?></h3>
 				<h3><?php print_percentage($class_query_id); ?></h3>
 				<h3>Grades:</h3>
+				</div>
+				</div>
+				<div class="row">
+				<div class="col-6 col-m-12">
 				<div id="categories_section">
 <?php
 					mysqli_stmt_free_result($stmt);
@@ -625,7 +650,11 @@ if(login_check())
 					}
 
 					echo '				</div>
-				<iframe id="category_details_window" name="category_details_window" style="margin-right:2%;width:45%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc=\'<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><link rel="stylesheet" type="text/css" href="custom.css.php"><title></title></head><body id="category_details"></body></html>\' >Your browser does not support frames</iframe>
+				</div>
+				<div class="col-6 col-m-12">
+				<iframe id="category_details_window" name="category_details_window" style="width:100%;float:right;display:inline-block;border:0px;" src="blank.html" srcdoc=\'<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="utf-8"><link rel="stylesheet" type="text/css" href="custom.css.php"><title></title></head><body id="category_details"></body></html>\' >Your browser does not support frames</iframe>
+				</div>
+				</div>
 				<br>
 				<br>
 				<a id="addCat" classID="'.$_GET['q'].'">Add Category</a>

@@ -20,7 +20,7 @@ if(empty($_GET['email']) || empty($_GET['key'])){
     $key = mysqli_real_escape_string($link, ($_GET['key']));
 	
 	// check if the confirm is in the database
-	if($stmt = mysqli_prepare($link, 'SELECT * FROM `confirm` WHERE email=? AND codeword=? LIMIT 1'))
+	if($stmt = mysqli_prepare($link, 'SELECT id, email, codeword, date, userid FROM `confirm` WHERE email=? AND codeword=? AND type=\'email\' LIMIT 1'))
 	{
 		mysqli_stmt_bind_param($stmt, "ss", $email, $key);
 		if(mysqli_stmt_execute($stmt))
@@ -62,7 +62,7 @@ if(empty($_GET['email']) || empty($_GET['key'])){
 					$action['text'] = 'Too many results returned.';
 				}else{
 					$action['result'] = 'error';
-					$action['text'] = mysqli_stmt_num_rows($stmt).'Confirmation Error. No results in the database using provided email and key. Check URL provided in email.';
+					$action['text'] = 'Confirmation Error. No results in the database using provided email and key. Check URL provided in email.';
 				}
 			}
 			
@@ -90,7 +90,7 @@ echo '<!DOCTYPE html>
 		$(document).ready(function(){
 			$(".disappear").delay(2500).slideUp(1200, "swing");
 		});
-		</script> 
+		</script>
 	</head>
 	<body>
 		<div id="page_content">
@@ -118,7 +118,7 @@ if(isset($action))
 	}
 echo '			<div id="container" style="min-height:75%">
 				<div class="wrapper">
-					<p>Return to the <a href="index.php">homepage</a></p>
+					<p>Return to the <a href="index.php">homepage</a> to log in.</p>
 				</div>
 			</div>
 		</div>
